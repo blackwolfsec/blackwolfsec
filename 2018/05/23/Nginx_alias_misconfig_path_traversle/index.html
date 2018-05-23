@@ -100,7 +100,7 @@
 <meta property="og:site_name" content="BlackWolfsec">
 <meta property="og:description" content="0x00 前言nginx错误配置alias，导致存在目录遍历，可跳出限制读取上一层目录及其任意子目录的文件的任意文件。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-23T12:26:03.962Z">
+<meta property="og:updated_time" content="2018-05-23T12:32:58.226Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Nginx错误配置alias导致目录遍历漏洞">
 <meta name="twitter:description" content="0x00 前言nginx错误配置alias，导致存在目录遍历，可跳出限制读取上一层目录及其任意子目录的文件的任意文件。">
@@ -422,10 +422,12 @@
 <figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">you <span class="keyword">get</span> <span class="keyword">me</span>, hahaha</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结:"></a>小结:</h3><ul>
+<h3 id="0x03小结"><a href="#0x03小结" class="headerlink" title="0x03小结:"></a>0x03小结:</h3><ul>
 <li>只能跳到上一层目录，读取上一层目录及其任意子目录的文件，不能任意目录遍历读取任意文件,有局限性。</li>
 <li>需要nginx配置缺陷，实战情况比较有限，但是真实存在（如：参考链接3）。</li>
-<li>一种场景是：很多网站会把备份文件放置在网页目录的上一层路径下，利用遍历读取备份文件；另一种场景是：路由限制到上传或静态图片路径，利用遍历读取上一层路径下的配置文件等。<h3 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h3></li>
+<li>一种场景是：很多网站会把备份文件放置在网页目录的上一层路径下，利用遍历读取备份文件；另一种场景是：路由限制到上传或静态图片路径，利用遍历读取上一层路径下的配置文件等。</li>
+</ul>
+<h3 id="0x04参考链接："><a href="#0x04参考链接：" class="headerlink" title="0x04参考链接："></a>0x04参考链接：</h3><ul>
 <li><a href="https://github.com/yandex/gixy/blob/master/docs/en/plugins/aliastraversal.md" target="_blank" rel="noopener">https://github.com/yandex/gixy/blob/master/docs/en/plugins/aliastraversal.md</a></li>
 <li><a href="https://hackerone.com/reports/317201" target="_blank" rel="noopener">https://hackerone.com/reports/317201</a></li>
 <li><a href="https://hackerone.com/reports/312510" target="_blank" rel="noopener">https://hackerone.com/reports/312510</a></li>
@@ -712,7 +714,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-前言"><span class="nav-number">1.</span> <span class="nav-text">0x00 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-环境搭建"><span class="nav-number">2.</span> <span class="nav-text">0x01 环境搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-漏洞利用"><span class="nav-number">3.</span> <span class="nav-text">0x02 漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考链接："><span class="nav-number">5.</span> <span class="nav-text">参考链接：</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-前言"><span class="nav-number">1.</span> <span class="nav-text">0x00 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-环境搭建"><span class="nav-number">2.</span> <span class="nav-text">0x01 环境搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-漏洞利用"><span class="nav-number">3.</span> <span class="nav-text">0x02 漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03小结"><span class="nav-number">4.</span> <span class="nav-text">0x03小结:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x04参考链接："><span class="nav-number">5.</span> <span class="nav-text">0x04参考链接：</span></a></li></ol></div>
             
 
           </div>
