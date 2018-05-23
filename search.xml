@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Nginx错误配置alias导致目录遍历漏洞]]></title>
+    <url>%2F2018%2F05%2F23%2FNginx_alias_misconfig_path_traversle%2F</url>
+    <content type="text"><![CDATA[0x00 前言nginx错误配置alias，导致存在目录遍历，可跳出限制读取上一层目录及其任意子目录的文件的任意文件。 0x01 环境搭建 使用richarvey/nginx-php-fpm镜像 1docker run -d -p 80:80 richarvey/nginx-php-fpm 配置nginx，添加配置test路由解析到/var/www/html/路径（注意：/test没有结尾的/） 1234# /etc/nginx/sites-available/default.conflocation /test &#123; alias /var/www/html/; &#125; 对应Web服务的文件结构，目标是目录遍历获取flag.txt的内容 123456|--var |--www |--flag.txt |--html |--index.php |--test.txt 0x02 漏洞利用 通过访问http://127.0.0.1/test/test.txt可以成功访问到test的内容如下(/test/test.txt路由请求，经处理后转换成：/var/www/html/test.txt)： 1this is a test 修改请求为http://127.0.0.1/test../flag.txt，可以成功跳到上一层目录下，读取到flag.txt的内容(`/test../flag.txt`路由请求，经处理后转换成：`/var/www/flag.txt`) 1you get me, hahaha 小结: 只能跳到上一层目录，读取上一层目录及其任意子目录的文件，不能任意目录遍历读取任意文件,有局限性。 需要nginx配置缺陷，实战情况比较有限，但是真实存在（如：参考链接3）。 一种场景是：很多网站会把备份文件放置在网页目录的上一层路径下，利用遍历读取备份文件；另一种场景是：路由限制到上传或静态图片路径，利用遍历读取上一层路径下的配置文件等。参考链接： https://github.com/yandex/gixy/blob/master/docs/en/plugins/aliastraversal.md https://hackerone.com/reports/317201 https://hackerone.com/reports/312510]]></content>
+      <categories>
+        <category>漏洞分析</category>
+      </categories>
+      <tags>
+        <tag>Security</tag>
+        <tag>Nginx</tag>
+        <tag>目录遍历</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Win10下常用的修改注册表Tips]]></title>
     <url>%2F2018%2F05%2F07%2Fwin10_reg_cmd_bash_ipsec%2F</url>
     <content type="text"><![CDATA[0x00 前言 Win10快速右键添加“在此处打开CMD”以及安装了ubuntu子系统或者Kali子系统的情况下，右键添加“在此处打开Bash” 解决Win10连接IPsec VPN报错问题。 0x01 Win10右键添加“在此处打开CMD”保存以下代码为cmd.reg,然后点击运行即可123456789101112131415161718Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\Directory\shell\open_cmd]@="Open CMD Here""HasLUAShield"=""[HKEY_CLASSES_ROOT\Directory\shell\open_cmd\command]@="cmd.exe /s /k pushd \"%V\""[-HKEY_CLASSES_ROOT\Directory\Background\shell\open_cmd][HKEY_CLASSES_ROOT\Directory\Background\shell\open_cmd]@="在此处打开CMD窗口""HasLUAShield"="""Icon"="cmd.exe"[HKEY_CLASSES_ROOT\Directory\Background\shell\open_cmd\command]@="cmd.exe /s /k pushd \"%V\""[-HKEY_CLASSES_ROOT\Drive\shell\open_cmd][HKEY_CLASSES_ROOT\Drive\shell\open_cmd]@="Open CMD Here""HasLUAShield"=""[HKEY_CLASSES_ROOT\Drive\shell\open_cmd\command] 0x02 Win10右键添加“在此处打开Bash”ps:前提是安装了Win10的ubuntu子系统或者Kali子系统 保存以下代码为bash.reg,然后点击运行即可123456789101112131415161718Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\Directory\shell\open_bash]@="Open Bash Here""HasLUAShield"=""[HKEY_CLASSES_ROOT\Directory\shell\open_bash\command]@="bash.exe"[-HKEY_CLASSES_ROOT\Directory\Background\shell\open_bash][HKEY_CLASSES_ROOT\Directory\Background\shell\open_bash]@="在此处打开Bash窗口""HasLUAShield"="""Icon"="bash.exe"[HKEY_CLASSES_ROOT\Directory\Background\shell\open_bash\command]@="bash.exe"[-HKEY_CLASSES_ROOT\Drive\shell\open_bash][HKEY_CLASSES_ROOT\Drive\shell\open_bash]@="Open Bash Here""HasLUAShield"=""[HKEY_CLASSES_ROOT\Drive\shell\open_bash\command] 0x03 Win10解决IPsecVPN连接报错问题ps:适用于：Windows Vista, 7, 8, 10, and 2008 Server:报错信息： 无法建立计算机与 VPN服务器之间的网络连接，因为远程服务器未响应。这可能是因为未将计算机与远程服务器之间的某种网络设备(如防火墙、NAT、路由器等)配置为容许 VPN 连接。请与管理员或服务供给商联系以确定哪种设备可能产生此问题 解决办法：保存如下代码为ipsec.reg，然后双击运行即可123Windows Registry Editor Version 5.00 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PolicyAgent] "AssumeUDPEncapsulationContextOnSendRule"=dword:00000002]]></content>
@@ -278,17 +291,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[温故而知新-DVWA]]></title>
-    <url>%2F2016%2F12%2F08%2Fdvwa%2F</url>
-    <content type="text"><![CDATA[0x00前言&emsp;&emsp;最近涉猎docker,用docker搭建了DVWA1.9版本，正好把DVWA又重新测试一遍，记录几点安全方面的感悟 0x01感悟1.后台爆破 通常的网站采用验证码的方式防止爆破，然而不少网站验证码过于简单，可以利用验证码识别后继续爆破，还有部分网站验证码可以重复使用，导致验证码形同虚设。 较为安全的后台防止爆破可以采用每次请求附带随机token的方式，可以防止不同的burp爆破,不过不能防止利用脚本获取页面后提交爆破。 geetest验证码通过机器学习判断是否为人为验证，然后返回一个validate，认证需要带上validate，可以防止简单的脚本爆破和burp爆破 最简单最安全的方式是错误次数限制,达到错误阈值后锁定用（ATM机取款仅仅有6位密码也是通过限制错误次数的保障用户的资金安全。） 2.CSRF CSRF主要应用在用户已登录的情况下，通过诱骗用户点击（或者执行加载）恶意链接，向合法的应用服务以用户的身份发送请求，在缺乏防范的时候造成删除文件、添加用户、修改密码等严重后果。 一般情况通过请求携带Token的方式防止CSRF攻击，不过，当网站存在XSS时：利用XSS获取Token，然后发起CSRF请求也可能导致攻击成功。 防止此类漏洞的有效手段是请求页面带Token,并且在敏感操作时要求再次用户确认（比如输入原始密码，提醒是否确定删除。） 3.命令注入 防止命令注入，主要是严格限定输入满足程序的要求，通过正则匹配满足预定输入（比如ip,必须为数字等），或者通过白名单方式限定输入 4.文件上传 文件上传有通过前端限制、黑名单上传类型限制、验证文件后缀、验证文件头，关键函数过滤等多种常见的方式，然而这些方法总存在绕过的漏洞和威胁，切实有效的方法是通过白名单限制上传的文件类型并在服务器端对文件进行重命名操作。 文件包含漏洞+上传可能导致绕过上传限制机制造成攻击 5.SQL注入之MySQL函数CONCAT,CONCAT_WS,GROUP_CONCAT对比(1)CONCAT(str1,str2,…)返回结果为连接参数产生的字符串,可以有一个或多个参数。如有任何一个参数为NULL ，则返回值为NULL。 (2)CONCAT_WS(separator,str1,str2,…),返回结果为以separator为分割符的字符串,此函数会忽略参数中的NULL值(如果分割符为NULL,如：select CONCAT_WS(NULL,user_id,last_name,first_name) from users;则返回结果为NULL) 测试CONCAT和CONCAT_WS处理NULL的区别：将Bob的last_name设置为NULL以后update users set last_name=NULL where user_id=5，比较CONCAT和CONCAT_WS的结果,可以看到CONCAT返回为NULL,而CONCAT_WS只是忽略了NULL的字符部分，其他正常显示 (3)GROUP_CONCAT([DISTINCT] expr [,expr …][ORDER BY {unsigned_integer | col_name | formula} [ASC | DESC] [,col …]][SEPARATOR str_val])函数返回带有来自一个组的连接的非NULL值的字符串，其中为需要将返回结果去重时使用DISTINCT，需要排序是使用ORDER BY，需要制定分割符是用SEPARATOR(默认是’,’) 将GROUP_CONCAT联合CONCAT_WS或CONCAT使用(NULL的结果已经被过滤)： 0x02总结 白名单比黑名单安全 最小化限制输入范围（限制只能内网访问比全网访问安全，限制数字比所有字符安全，重命名比采用用户输入文件名更安全）]]></content>
-      <categories>
-        <category>Security</category>
-      </categories>
-      <tags>
-        <tag>Security</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[涉猎Docker]]></title>
     <url>%2F2016%2F12%2F08%2Fdocker%2F</url>
     <content type="text"><![CDATA[0x00前言&emsp;&emsp;初步接触Docker，记录一下安装过程和常用命令，同时安装nsenter可以十分方便地进入Docker进行管理。 0x01实践官方安装教程1.检测操作系统内核版本1uname -a 返回如下:1Ubuntu 14.04.5 LTS (GNU/Linux 3.13.0-101-generic x86_64) 2.Docker安装更新源 1sudo apt-get update 安装对apt对https的支持和ca证书1sudo apt-get install apt-transport-https ca-certificates 添加Docker的密钥及源文件12sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609Decho "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list 更新Docker源并安装Docker123sudo apt-get updatesudo apt-get install docker-enginesudo service docker start # 提示无此服务是执行reboot 3.常用命令搜索docker镜像1sudo docker search 获取ubuntu镜像 1sudo docker pull ubuntu 查看已获取docker镜像1sudo docker images 命令行运行docker(命名为ubuntu_test,-t -i指定命令行方式，并启动bash，输入exit退出docker)1sudo docker run --name ubuntu_test -i -t ubuntu /bin/bash 后台运行docker,并映射端口到宿主机(后台运行tutum/lamp镜像，并把docker的80端口映射到宿主机8080,3306映射到宿主机3306,可以访问宿主机的8080端口获取docker的web服务) 1sudo docker run -d -p 8080:80 -p 3306:3306 --name lamp_test tutum/lamp 查看所有的docker(运行和停止的，并获取到docker的id和name唯一标识符)1sudo docker ps -a 已创建docker的启动、停止、重启（指定唯一标识符id或name,以ubuntu_test 为例）123sudo docker start ubuntu_test sudo docker stop ubuntu_test sudo docker restart ubuntu_test 删除docker实例（指定唯一标识符id或name,以ubuntu_test 为例）1sudo rm ubuntu_test 删除docker镜像（指定镜像标识符，以获取的ubuntu镜像为例）1sudo rmi ubuntu 4.安装nsenter进入docker（已过时，使用docker exec -it container_id /bin/bash）docker在不易后台方式运行时，退出以后docker示例就停止运行，然而后台方式运行情况下，如何进入docker内部执行相关操作就十分重要了(1)安装（笔者环境为Ubuntu 14.04.5 LTS）方式1.安装官方最新版打开连接https://www.kernel.org/pub/linux/utils/util-linux/选择最新版本，复制链接地址下载安装文件(以2.29为例) 1234567wget https://www.kernel.org/pub/linux/utils/util-linux/v2.29/util-linux-2.29.tar.gztar -zxvf util-linux-2.29.tar.gzlscd util-linux-2.29./configure --without-python --disable-all-programs --enable-nsenter --without-ncursesmake nsentercp nsenter /usr/local/bin 方式2.一键安装（使用https://github.com/jpetazzo/nsenter的docker镜像安装）1sudo docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter (2)nsenter使用其中container_name_or_ID修改为需要进入docker的唯一标识符id或name1nsenter --target $(docker inspect --format \&#123;\&#123;.State.Pid\&#125;\&#125; container_name_or_ID) --mount --uts --ipc --net --pid 以lamp_test为例，执行如下命令直接进入docker内部1sudo nsenter --target $(sudo docker inspect --format \&#123;\&#123;.State.Pid\&#125;\&#125; lamp_test) --mount --uts --ipc --net --pid 0x02其他 docker使用nanoexport TERM=xterm docker挂载目录docker run -it -v /home/dock/Downloads:/usr/Downloads ubuntu64 /bin/bash]]></content>
@@ -298,6 +300,17 @@
       <tags>
         <tag>Docker</tag>
         <tag>Ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[温故而知新-DVWA]]></title>
+    <url>%2F2016%2F12%2F08%2Fdvwa%2F</url>
+    <content type="text"><![CDATA[0x00前言&emsp;&emsp;最近涉猎docker,用docker搭建了DVWA1.9版本，正好把DVWA又重新测试一遍，记录几点安全方面的感悟 0x01感悟1.后台爆破 通常的网站采用验证码的方式防止爆破，然而不少网站验证码过于简单，可以利用验证码识别后继续爆破，还有部分网站验证码可以重复使用，导致验证码形同虚设。 较为安全的后台防止爆破可以采用每次请求附带随机token的方式，可以防止不同的burp爆破,不过不能防止利用脚本获取页面后提交爆破。 geetest验证码通过机器学习判断是否为人为验证，然后返回一个validate，认证需要带上validate，可以防止简单的脚本爆破和burp爆破 最简单最安全的方式是错误次数限制,达到错误阈值后锁定用（ATM机取款仅仅有6位密码也是通过限制错误次数的保障用户的资金安全。） 2.CSRF CSRF主要应用在用户已登录的情况下，通过诱骗用户点击（或者执行加载）恶意链接，向合法的应用服务以用户的身份发送请求，在缺乏防范的时候造成删除文件、添加用户、修改密码等严重后果。 一般情况通过请求携带Token的方式防止CSRF攻击，不过，当网站存在XSS时：利用XSS获取Token，然后发起CSRF请求也可能导致攻击成功。 防止此类漏洞的有效手段是请求页面带Token,并且在敏感操作时要求再次用户确认（比如输入原始密码，提醒是否确定删除。） 3.命令注入 防止命令注入，主要是严格限定输入满足程序的要求，通过正则匹配满足预定输入（比如ip,必须为数字等），或者通过白名单方式限定输入 4.文件上传 文件上传有通过前端限制、黑名单上传类型限制、验证文件后缀、验证文件头，关键函数过滤等多种常见的方式，然而这些方法总存在绕过的漏洞和威胁，切实有效的方法是通过白名单限制上传的文件类型并在服务器端对文件进行重命名操作。 文件包含漏洞+上传可能导致绕过上传限制机制造成攻击 5.SQL注入之MySQL函数CONCAT,CONCAT_WS,GROUP_CONCAT对比(1)CONCAT(str1,str2,…)返回结果为连接参数产生的字符串,可以有一个或多个参数。如有任何一个参数为NULL ，则返回值为NULL。 (2)CONCAT_WS(separator,str1,str2,…),返回结果为以separator为分割符的字符串,此函数会忽略参数中的NULL值(如果分割符为NULL,如：select CONCAT_WS(NULL,user_id,last_name,first_name) from users;则返回结果为NULL) 测试CONCAT和CONCAT_WS处理NULL的区别：将Bob的last_name设置为NULL以后update users set last_name=NULL where user_id=5，比较CONCAT和CONCAT_WS的结果,可以看到CONCAT返回为NULL,而CONCAT_WS只是忽略了NULL的字符部分，其他正常显示 (3)GROUP_CONCAT([DISTINCT] expr [,expr …][ORDER BY {unsigned_integer | col_name | formula} [ASC | DESC] [,col …]][SEPARATOR str_val])函数返回带有来自一个组的连接的非NULL值的字符串，其中为需要将返回结果去重时使用DISTINCT，需要排序是使用ORDER BY，需要制定分割符是用SEPARATOR(默认是’,’) 将GROUP_CONCAT联合CONCAT_WS或CONCAT使用(NULL的结果已经被过滤)： 0x02总结 白名单比黑名单安全 最小化限制输入范围（限制只能内网访问比全网访问安全，限制数字比所有字符安全，重命名比采用用户输入文件名更安全）]]></content>
+      <categories>
+        <category>Security</category>
+      </categories>
+      <tags>
+        <tag>Security</tag>
       </tags>
   </entry>
   <entry>
@@ -474,8 +487,8 @@
       </categories>
       <tags>
         <tag>Python</tag>
-        <tag>Telnet</tag>
         <tag>Honeypot</tag>
+        <tag>Telnet</tag>
       </tags>
   </entry>
   <entry>
@@ -521,8 +534,8 @@
       </categories>
       <tags>
         <tag>Python</tag>
-        <tag>Honeypot</tag>
         <tag>Ftp</tag>
+        <tag>Honeypot</tag>
       </tags>
   </entry>
 </search>
