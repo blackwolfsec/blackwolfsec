@@ -3,6 +3,27 @@
   
     
     <entry>
+      <title>PHP索引数组+unset使用不当导致的问题</title>
+      <link href="/2018/07/14/Php_unset/"/>
+      <url>/2018/07/14/Php_unset/</url>
+      <content type="html"><![CDATA[<h3 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h3><p>首发<a href="https://xz.aliyun.com/t/2443" target="_blank" rel="noopener">先知论坛</a>，通常网站后台可以配置允许上传附件的文件类型，一般登录后台，添加php类型即可上传php文件getshell。但是，随着开发者安全意识的提高，开发者可能会在代码层面强制限制php等特定文件类型的上传，有时会使用unset函数销毁删除允许上传文件类型的<a href="http://www.w3school.com.cn/php/php_arrays.asp" target="_blank" rel="noopener">索引数组</a>,如：Array(‘gif’,’jpg’,’jpeg’,’bmp’,’png’,’php’)，不过错误地使用unset函数并不能到达过滤限制的效果。<br><a id="more"></a></p><h3 id="0x01问题详情"><a href="#0x01问题详情" class="headerlink" title="0x01问题详情"></a>0x01问题详情</h3><p><strong>问题描述：</strong></p><p>最近在审计某CMS代码过程中，发现后台限制文件上传类型的代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ext_limit = $ext_limit != <span class="string">''</span> ? parse_attr($ext_limit) : <span class="string">''</span>;</span><br><span class="line"><span class="keyword">foreach</span> ([<span class="string">'php'</span>, <span class="string">'html'</span>, <span class="string">'htm'</span>, <span class="string">'js'</span>] <span class="keyword">as</span> $vo) &#123;</span><br><span class="line">    <span class="keyword">unset</span>($ext_limit[$vo]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>其目的是实现:获取配置中的允许上传文件类型$ext_limit并转换为数组，无论后台是否添加了php等类型文件，均强制从允许上传文件类型的数组中删除php,html,htm,js等类型。</p><p>但是由于unset函数使用不当，导致其代码无法达到该目的。具体地，执行如下代码：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ext_limit =  <span class="keyword">Array</span>(<span class="string">'gif'</span>,<span class="string">'jpg'</span>,<span class="string">'jpeg'</span>,<span class="string">'bmp'</span>,<span class="string">'png'</span>,<span class="string">'php'</span>);</span><br><span class="line">var_dump($ext_limit);</span><br><span class="line"><span class="keyword">foreach</span> ([<span class="string">'php'</span>, <span class="string">'html'</span>, <span class="string">'htm'</span>, <span class="string">'js'</span>] <span class="keyword">as</span> $vo) &#123;</span><br><span class="line">    <span class="keyword">unset</span>($ext_limit[$vo]);</span><br><span class="line">&#125;</span><br><span class="line">var_dump($ext_limit);</span><br></pre></td></tr></table></figure></p><p>得到输出为如下，可以看到php并没有被删除<br><figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">D</span>:\wamp\www\test.php:<span class="number">15</span>:</span><br><span class="line"><span class="built_in">array</span> (size=<span class="number">6</span>)</span><br><span class="line">  <span class="number">0</span> =&gt; <span class="built_in">string</span> <span class="symbol">'gif'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">1</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpg'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">2</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpeg'</span> (length=<span class="number">4</span>)</span><br><span class="line">  <span class="number">3</span> =&gt; <span class="built_in">string</span> <span class="symbol">'bmp'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">4</span> =&gt; <span class="built_in">string</span> <span class="symbol">'png'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">5</span> =&gt; <span class="built_in">string</span> <span class="symbol">'php'</span> (length=<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="type">D</span>:\wamp\www\test.php:<span class="number">19</span>:</span><br><span class="line"><span class="built_in">array</span> (size=<span class="number">6</span>)</span><br><span class="line">  <span class="number">0</span> =&gt; <span class="built_in">string</span> <span class="symbol">'gif'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">1</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpg'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">2</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpeg'</span> (length=<span class="number">4</span>)</span><br><span class="line">  <span class="number">3</span> =&gt; <span class="built_in">string</span> <span class="symbol">'bmp'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">4</span> =&gt; <span class="built_in">string</span> <span class="symbol">'png'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">5</span> =&gt; <span class="built_in">string</span> <span class="symbol">'php'</span> (length=<span class="number">3</span>)</span><br></pre></td></tr></table></figure></p><p><strong>问题分析：</strong></p><p>unset函数的使用说明可以参考<a href="http://www.php.net/manual/zh/function.unset.php" target="_blank" rel="noopener">php官网</a>，简单理解就是：unset可以销毁掉一个变量；或者根据传入的key值，销毁数组类型中指定的键值对。<br>针对PHP 索引数组，调用unset时必须调用其对应的数字索引才能销毁指定的键值对。所以如果传入unset函数的参数不是索引，而是其值的情况（如此处unset(‘php’)），无法销毁删除对应为php的键值对。</p><h3 id="0x03修复办法"><a href="#0x03修复办法" class="headerlink" title="0x03修复办法"></a>0x03修复办法</h3><p>修改以上存在缺陷的代码为如下,主要是枚举索引数组为key=&gt;value的形式，根据value进行比较，满足条件时将对应的key传入unset函数，从而销毁删除。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ext_limit =  <span class="keyword">Array</span>(<span class="string">'gif'</span>,<span class="string">'jpg'</span>,<span class="string">'jpeg'</span>,<span class="string">'bmp'</span>,<span class="string">'png'</span>,<span class="string">'php'</span>);</span><br><span class="line">var_dump($ext_limit);</span><br><span class="line"><span class="keyword">foreach</span> ([<span class="string">'php'</span>, <span class="string">'html'</span>, <span class="string">'htm'</span>, <span class="string">'js'</span>] <span class="keyword">as</span> $vo) &#123;</span><br><span class="line">    <span class="keyword">foreach</span>($ext_limit <span class="keyword">as</span> $key=&gt;$value)&#123;</span><br><span class="line">        <span class="keyword">if</span>($value===$vo)&#123;</span><br><span class="line">            <span class="keyword">unset</span>($ext_limit[$key]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;     </span><br><span class="line">&#125;</span><br><span class="line">var_dump($ext_limit);</span><br></pre></td></tr></table></figure></p><p>输出结果如下(php对应的键值对已被删除)：<br><figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">D</span>:\wamp\www\test.php:<span class="number">15</span>:</span><br><span class="line"><span class="built_in">array</span> (size=<span class="number">6</span>)</span><br><span class="line">  <span class="number">0</span> =&gt; <span class="built_in">string</span> <span class="symbol">'gif'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">1</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpg'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">2</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpeg'</span> (length=<span class="number">4</span>)</span><br><span class="line">  <span class="number">3</span> =&gt; <span class="built_in">string</span> <span class="symbol">'bmp'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">4</span> =&gt; <span class="built_in">string</span> <span class="symbol">'png'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">5</span> =&gt; <span class="built_in">string</span> <span class="symbol">'php'</span> (length=<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="type">D</span>:\wamp\www\test.php:<span class="number">23</span>:</span><br><span class="line"><span class="built_in">array</span> (size=<span class="number">5</span>)</span><br><span class="line">  <span class="number">0</span> =&gt; <span class="built_in">string</span> <span class="symbol">'gif'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">1</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpg'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">2</span> =&gt; <span class="built_in">string</span> <span class="symbol">'jpeg'</span> (length=<span class="number">4</span>)</span><br><span class="line">  <span class="number">3</span> =&gt; <span class="built_in">string</span> <span class="symbol">'bmp'</span> (length=<span class="number">3</span>)</span><br><span class="line">  <span class="number">4</span> =&gt; <span class="built_in">string</span> <span class="symbol">'png'</span> (length=<span class="number">3</span>)</span><br></pre></td></tr></table></figure></p><h3 id="0x04小结"><a href="#0x04小结" class="headerlink" title="0x04小结"></a>0x04小结</h3><p>使用索引数组时，如果要使用unset销毁删除指定的键值对，切记采用<strong>枚举索引数组为key=&gt;value的形式，根据value进行比较，满足条件时将对应的key传入unset函数</strong></p><p>ps:安全问题的分析与挖掘就是一个开发者与hacker攻防较量的过程，对抗的点就是哪一方考虑的更加周全。</p>]]></content>
+      
+      <categories>
+          
+          <category> 代码审计 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> PHP，代码审计，Security </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>Gitlab远程代码执行漏洞</title>
       <link href="/2018/05/30/Gitlab_rce/"/>
       <url>/2018/05/30/Gitlab_rce/</url>
@@ -169,11 +190,11 @@
       
         <tags>
             
+            <tag> CVE </tag>
+            
             <tag> PHP </tag>
             
             <tag> 代码审计 </tag>
-            
-            <tag> CVE </tag>
             
         </tags>
       
@@ -194,11 +215,11 @@
       
         <tags>
             
+            <tag> CVE </tag>
+            
             <tag> PHP </tag>
             
             <tag> 代码审计 </tag>
-            
-            <tag> CVE </tag>
             
         </tags>
       
@@ -336,11 +357,11 @@
       
         <tags>
             
+            <tag> CVE </tag>
+            
             <tag> PHP </tag>
             
             <tag> 代码审计 </tag>
-            
-            <tag> CVE </tag>
             
         </tags>
       
@@ -526,11 +547,11 @@
       
         <tags>
             
+            <tag> CVE </tag>
+            
             <tag> PHP </tag>
             
             <tag> 代码审计 </tag>
-            
-            <tag> CVE </tag>
             
         </tags>
       
@@ -551,11 +572,11 @@
       
         <tags>
             
+            <tag> CVE </tag>
+            
             <tag> PHP </tag>
             
             <tag> 代码审计 </tag>
-            
-            <tag> CVE </tag>
             
         </tags>
       
@@ -960,9 +981,9 @@
             
             <tag> Python </tag>
             
-            <tag> Honeypot </tag>
-            
             <tag> Telnet </tag>
+            
+            <tag> Honeypot </tag>
             
         </tags>
       
@@ -1050,9 +1071,9 @@
             
             <tag> Python </tag>
             
-            <tag> Ftp </tag>
-            
             <tag> Honeypot </tag>
+            
+            <tag> Ftp </tag>
             
         </tags>
       
