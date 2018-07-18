@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[BFscan]]></title>
+    <url>%2F2018%2F07%2F18%2FBFscan%2F</url>
+    <content type="text"><![CDATA[0x00前言基于python3实现规避防火墙的轻量级信息探测工具,Github地址 0x02BFscan BFscan is a tiny Bypass waF Scanner 基于python3默认模块，无需安装任何第三方模块即可使用 防火墙规避策略 基于telnetlib实现telnet扫描，可以达到一定bypass防火墙的效果 支持ip段扫描（CIDR地址块），采取ip地址随机化，避免同一时间段对相邻ip进行扫描，尽量规避触发防火墙规则 极限情况下，–slow参数设置单进程扫描，并在每次端口探测之前添加5-20秒的随机延迟 Usage123456789101112131415161718192021222324252627 ___ ___ / __\ / __\__ ___ __ _ _ __ /__\/// _\/ __|/ __/ _` | '_ \/ \/ \ / \__ \ (__ (_| | | | |\_____\/ |___/\___\__,_|_| |_|A Bypass waF Scannerstarting......Usage: BFscan.py [options]Options: -h, --help show this help message and exit -m MULTIPROCESS, --multiprocess=MULTIPROCESS Num of multiprocess running concurrently, 30 by default -t THREADS, --threads=THREADS Num of scan threads for each scan process, 10 by default --ip=IP IP addresses. Ex: 192.168.0.1 or 192.168.1.0/24 -p PORT, --port=PORT Scan specified ports, default: 21-22,445,80-88,1433,27 017,3306,3389,6379,8080-8088,9200 --timeout=TIMEOUT Max timeout for each telnet connection, 10 by default --slow Slow model to bypass waf,which will set threads=1 and add random delay of 5-20 seconds for each port scan. It will be very slow, please use it carefully.]]></content>
+      <categories>
+        <category>Security</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>BFscan</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[PHP索引数组+unset使用不当导致的问题]]></title>
     <url>%2F2018%2F07%2F14%2FPhp_unset%2F</url>
     <content type="text"><![CDATA[0x00前言首发先知论坛，通常网站后台可以配置允许上传附件的文件类型，一般登录后台，添加php类型即可上传php文件getshell。但是，随着开发者安全意识的提高，开发者可能会在代码层面强制限制php等特定文件类型的上传，有时会使用unset函数销毁删除允许上传文件类型的索引数组,如：Array(‘gif’,’jpg’,’jpeg’,’bmp’,’png’,’php’)，不过错误地使用unset函数并不能到达过滤限制的效果。 0x01问题详情问题描述： 最近在审计某CMS代码过程中，发现后台限制文件上传类型的代码如下：1234$ext_limit = $ext_limit != '' ? parse_attr($ext_limit) : '';foreach (['php', 'html', 'htm', 'js'] as $vo) &#123; unset($ext_limit[$vo]);&#125; 其目的是实现:获取配置中的允许上传文件类型$ext_limit并转换为数组，无论后台是否添加了php等类型文件，均强制从允许上传文件类型的数组中删除php,html,htm,js等类型。 但是由于unset函数使用不当，导致其代码无法达到该目的。具体地，执行如下代码：123456$ext_limit = Array('gif','jpg','jpeg','bmp','png','php');var_dump($ext_limit);foreach (['php', 'html', 'htm', 'js'] as $vo) &#123; unset($ext_limit[$vo]);&#125;var_dump($ext_limit); 得到输出为如下，可以看到php并没有被删除1234567891011121314151617D:\wamp\www\test.php:15:array (size=6) 0 =&gt; string 'gif' (length=3) 1 =&gt; string 'jpg' (length=3) 2 =&gt; string 'jpeg' (length=4) 3 =&gt; string 'bmp' (length=3) 4 =&gt; string 'png' (length=3) 5 =&gt; string 'php' (length=3)D:\wamp\www\test.php:19:array (size=6) 0 =&gt; string 'gif' (length=3) 1 =&gt; string 'jpg' (length=3) 2 =&gt; string 'jpeg' (length=4) 3 =&gt; string 'bmp' (length=3) 4 =&gt; string 'png' (length=3) 5 =&gt; string 'php' (length=3) 问题分析： unset函数的使用说明可以参考php官网，简单理解就是：unset可以销毁掉一个变量；或者根据传入的key值，销毁数组类型中指定的键值对。针对PHP 索引数组，调用unset时必须调用其对应的数字索引才能销毁指定的键值对。所以如果传入unset函数的参数不是索引，而是其值的情况（如此处unset(‘php’)），无法销毁删除对应为php的键值对。 0x03修复办法修改以上存在缺陷的代码为如下,主要是枚举索引数组为key=&gt;value的形式，根据value进行比较，满足条件时将对应的key传入unset函数，从而销毁删除。12345678910$ext_limit = Array('gif','jpg','jpeg','bmp','png','php');var_dump($ext_limit);foreach (['php', 'html', 'htm', 'js'] as $vo) &#123; foreach($ext_limit as $key=&gt;$value)&#123; if($value===$vo)&#123; unset($ext_limit[$key]); &#125; &#125; &#125;var_dump($ext_limit); 输出结果如下(php对应的键值对已被删除)：12345678910111213141516D:\wamp\www\test.php:15:array (size=6) 0 =&gt; string 'gif' (length=3) 1 =&gt; string 'jpg' (length=3) 2 =&gt; string 'jpeg' (length=4) 3 =&gt; string 'bmp' (length=3) 4 =&gt; string 'png' (length=3) 5 =&gt; string 'php' (length=3)D:\wamp\www\test.php:23:array (size=5) 0 =&gt; string 'gif' (length=3) 1 =&gt; string 'jpg' (length=3) 2 =&gt; string 'jpeg' (length=4) 3 =&gt; string 'bmp' (length=3) 4 =&gt; string 'png' (length=3) 0x04小结使用索引数组时，如果要使用unset销毁删除指定的键值对，切记采用枚举索引数组为key=&gt;value的形式，根据value进行比较，满足条件时将对应的key传入unset函数 ps:安全问题的分析与挖掘就是一个开发者与hacker攻防较量的过程，对抗的点就是哪一方考虑的更加周全。]]></content>
@@ -98,9 +110,9 @@
         <category>代码审计</category>
       </categories>
       <tags>
+        <tag>CVE</tag>
         <tag>PHP</tag>
         <tag>代码审计</tag>
-        <tag>CVE</tag>
       </tags>
   </entry>
   <entry>
@@ -111,9 +123,9 @@
         <category>代码审计</category>
       </categories>
       <tags>
+        <tag>CVE</tag>
         <tag>PHP</tag>
         <tag>代码审计</tag>
-        <tag>CVE</tag>
       </tags>
   </entry>
   <entry>
@@ -185,9 +197,9 @@
         <category>代码审计</category>
       </categories>
       <tags>
+        <tag>CVE</tag>
         <tag>PHP</tag>
         <tag>代码审计</tag>
-        <tag>CVE</tag>
       </tags>
   </entry>
   <entry>
@@ -284,9 +296,9 @@
         <category>代码审计</category>
       </categories>
       <tags>
+        <tag>CVE</tag>
         <tag>PHP</tag>
         <tag>代码审计</tag>
-        <tag>CVE</tag>
       </tags>
   </entry>
   <entry>
@@ -297,9 +309,9 @@
         <category>代码审计</category>
       </categories>
       <tags>
+        <tag>CVE</tag>
         <tag>PHP</tag>
         <tag>代码审计</tag>
-        <tag>CVE</tag>
       </tags>
   </entry>
   <entry>
@@ -315,17 +327,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[温故而知新-DVWA]]></title>
-    <url>%2F2016%2F12%2F08%2Fdvwa%2F</url>
-    <content type="text"><![CDATA[0x00前言&emsp;&emsp;最近涉猎docker,用docker搭建了DVWA1.9版本，正好把DVWA又重新测试一遍，记录几点安全方面的感悟 0x01感悟1.后台爆破 通常的网站采用验证码的方式防止爆破，然而不少网站验证码过于简单，可以利用验证码识别后继续爆破，还有部分网站验证码可以重复使用，导致验证码形同虚设。 较为安全的后台防止爆破可以采用每次请求附带随机token的方式，可以防止不同的burp爆破,不过不能防止利用脚本获取页面后提交爆破。 geetest验证码通过机器学习判断是否为人为验证，然后返回一个validate，认证需要带上validate，可以防止简单的脚本爆破和burp爆破 最简单最安全的方式是错误次数限制,达到错误阈值后锁定用（ATM机取款仅仅有6位密码也是通过限制错误次数的保障用户的资金安全。） 2.CSRF CSRF主要应用在用户已登录的情况下，通过诱骗用户点击（或者执行加载）恶意链接，向合法的应用服务以用户的身份发送请求，在缺乏防范的时候造成删除文件、添加用户、修改密码等严重后果。 一般情况通过请求携带Token的方式防止CSRF攻击，不过，当网站存在XSS时：利用XSS获取Token，然后发起CSRF请求也可能导致攻击成功。 防止此类漏洞的有效手段是请求页面带Token,并且在敏感操作时要求再次用户确认（比如输入原始密码，提醒是否确定删除。） 3.命令注入 防止命令注入，主要是严格限定输入满足程序的要求，通过正则匹配满足预定输入（比如ip,必须为数字等），或者通过白名单方式限定输入 4.文件上传 文件上传有通过前端限制、黑名单上传类型限制、验证文件后缀、验证文件头，关键函数过滤等多种常见的方式，然而这些方法总存在绕过的漏洞和威胁，切实有效的方法是通过白名单限制上传的文件类型并在服务器端对文件进行重命名操作。 文件包含漏洞+上传可能导致绕过上传限制机制造成攻击 5.SQL注入之MySQL函数CONCAT,CONCAT_WS,GROUP_CONCAT对比(1)CONCAT(str1,str2,…)返回结果为连接参数产生的字符串,可以有一个或多个参数。如有任何一个参数为NULL ，则返回值为NULL。 (2)CONCAT_WS(separator,str1,str2,…),返回结果为以separator为分割符的字符串,此函数会忽略参数中的NULL值(如果分割符为NULL,如：select CONCAT_WS(NULL,user_id,last_name,first_name) from users;则返回结果为NULL) 测试CONCAT和CONCAT_WS处理NULL的区别：将Bob的last_name设置为NULL以后update users set last_name=NULL where user_id=5，比较CONCAT和CONCAT_WS的结果,可以看到CONCAT返回为NULL,而CONCAT_WS只是忽略了NULL的字符部分，其他正常显示 (3)GROUP_CONCAT([DISTINCT] expr [,expr …][ORDER BY {unsigned_integer | col_name | formula} [ASC | DESC] [,col …]][SEPARATOR str_val])函数返回带有来自一个组的连接的非NULL值的字符串，其中为需要将返回结果去重时使用DISTINCT，需要排序是使用ORDER BY，需要制定分割符是用SEPARATOR(默认是’,’) 将GROUP_CONCAT联合CONCAT_WS或CONCAT使用(NULL的结果已经被过滤)： 0x02总结 白名单比黑名单安全 最小化限制输入范围（限制只能内网访问比全网访问安全，限制数字比所有字符安全，重命名比采用用户输入文件名更安全）]]></content>
-      <categories>
-        <category>Security</category>
-      </categories>
-      <tags>
-        <tag>Security</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[涉猎Docker]]></title>
     <url>%2F2016%2F12%2F08%2Fdocker%2F</url>
     <content type="text"><![CDATA[0x00前言&emsp;&emsp;初步接触Docker，记录一下安装过程和常用命令，同时安装nsenter可以十分方便地进入Docker进行管理。 0x01实践官方安装教程1.检测操作系统内核版本1uname -a 返回如下:1Ubuntu 14.04.5 LTS (GNU/Linux 3.13.0-101-generic x86_64) 2.Docker安装更新源 1sudo apt-get update 安装对apt对https的支持和ca证书1sudo apt-get install apt-transport-https ca-certificates 添加Docker的密钥及源文件12sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609Decho "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list 更新Docker源并安装Docker123sudo apt-get updatesudo apt-get install docker-enginesudo service docker start # 提示无此服务是执行reboot 3.常用命令搜索docker镜像1sudo docker search 获取ubuntu镜像 1sudo docker pull ubuntu 查看已获取docker镜像1sudo docker images 命令行运行docker(命名为ubuntu_test,-t -i指定命令行方式，并启动bash，输入exit退出docker)1sudo docker run --name ubuntu_test -i -t ubuntu /bin/bash 后台运行docker,并映射端口到宿主机(后台运行tutum/lamp镜像，并把docker的80端口映射到宿主机8080,3306映射到宿主机3306,可以访问宿主机的8080端口获取docker的web服务) 1sudo docker run -d -p 8080:80 -p 3306:3306 --name lamp_test tutum/lamp 查看所有的docker(运行和停止的，并获取到docker的id和name唯一标识符)1sudo docker ps -a 已创建docker的启动、停止、重启（指定唯一标识符id或name,以ubuntu_test 为例）123sudo docker start ubuntu_test sudo docker stop ubuntu_test sudo docker restart ubuntu_test 删除docker实例（指定唯一标识符id或name,以ubuntu_test 为例）1sudo rm ubuntu_test 删除docker镜像（指定镜像标识符，以获取的ubuntu镜像为例）1sudo rmi ubuntu 4.安装nsenter进入docker（已过时，使用docker exec -it container_id /bin/bash）docker在不易后台方式运行时，退出以后docker示例就停止运行，然而后台方式运行情况下，如何进入docker内部执行相关操作就十分重要了(1)安装（笔者环境为Ubuntu 14.04.5 LTS）方式1.安装官方最新版打开连接https://www.kernel.org/pub/linux/utils/util-linux/选择最新版本，复制链接地址下载安装文件(以2.29为例) 1234567wget https://www.kernel.org/pub/linux/utils/util-linux/v2.29/util-linux-2.29.tar.gztar -zxvf util-linux-2.29.tar.gzlscd util-linux-2.29./configure --without-python --disable-all-programs --enable-nsenter --without-ncursesmake nsentercp nsenter /usr/local/bin 方式2.一键安装（使用https://github.com/jpetazzo/nsenter的docker镜像安装）1sudo docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter (2)nsenter使用其中container_name_or_ID修改为需要进入docker的唯一标识符id或name1nsenter --target $(docker inspect --format \&#123;\&#123;.State.Pid\&#125;\&#125; container_name_or_ID) --mount --uts --ipc --net --pid 以lamp_test为例，执行如下命令直接进入docker内部1sudo nsenter --target $(sudo docker inspect --format \&#123;\&#123;.State.Pid\&#125;\&#125; lamp_test) --mount --uts --ipc --net --pid 0x02其他 docker使用nanoexport TERM=xterm docker挂载目录docker run -it -v /home/dock/Downloads:/usr/Downloads ubuntu64 /bin/bash]]></content>
@@ -335,6 +336,17 @@
       <tags>
         <tag>Docker</tag>
         <tag>Ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[温故而知新-DVWA]]></title>
+    <url>%2F2016%2F12%2F08%2Fdvwa%2F</url>
+    <content type="text"><![CDATA[0x00前言&emsp;&emsp;最近涉猎docker,用docker搭建了DVWA1.9版本，正好把DVWA又重新测试一遍，记录几点安全方面的感悟 0x01感悟1.后台爆破 通常的网站采用验证码的方式防止爆破，然而不少网站验证码过于简单，可以利用验证码识别后继续爆破，还有部分网站验证码可以重复使用，导致验证码形同虚设。 较为安全的后台防止爆破可以采用每次请求附带随机token的方式，可以防止不同的burp爆破,不过不能防止利用脚本获取页面后提交爆破。 geetest验证码通过机器学习判断是否为人为验证，然后返回一个validate，认证需要带上validate，可以防止简单的脚本爆破和burp爆破 最简单最安全的方式是错误次数限制,达到错误阈值后锁定用（ATM机取款仅仅有6位密码也是通过限制错误次数的保障用户的资金安全。） 2.CSRF CSRF主要应用在用户已登录的情况下，通过诱骗用户点击（或者执行加载）恶意链接，向合法的应用服务以用户的身份发送请求，在缺乏防范的时候造成删除文件、添加用户、修改密码等严重后果。 一般情况通过请求携带Token的方式防止CSRF攻击，不过，当网站存在XSS时：利用XSS获取Token，然后发起CSRF请求也可能导致攻击成功。 防止此类漏洞的有效手段是请求页面带Token,并且在敏感操作时要求再次用户确认（比如输入原始密码，提醒是否确定删除。） 3.命令注入 防止命令注入，主要是严格限定输入满足程序的要求，通过正则匹配满足预定输入（比如ip,必须为数字等），或者通过白名单方式限定输入 4.文件上传 文件上传有通过前端限制、黑名单上传类型限制、验证文件后缀、验证文件头，关键函数过滤等多种常见的方式，然而这些方法总存在绕过的漏洞和威胁，切实有效的方法是通过白名单限制上传的文件类型并在服务器端对文件进行重命名操作。 文件包含漏洞+上传可能导致绕过上传限制机制造成攻击 5.SQL注入之MySQL函数CONCAT,CONCAT_WS,GROUP_CONCAT对比(1)CONCAT(str1,str2,…)返回结果为连接参数产生的字符串,可以有一个或多个参数。如有任何一个参数为NULL ，则返回值为NULL。 (2)CONCAT_WS(separator,str1,str2,…),返回结果为以separator为分割符的字符串,此函数会忽略参数中的NULL值(如果分割符为NULL,如：select CONCAT_WS(NULL,user_id,last_name,first_name) from users;则返回结果为NULL) 测试CONCAT和CONCAT_WS处理NULL的区别：将Bob的last_name设置为NULL以后update users set last_name=NULL where user_id=5，比较CONCAT和CONCAT_WS的结果,可以看到CONCAT返回为NULL,而CONCAT_WS只是忽略了NULL的字符部分，其他正常显示 (3)GROUP_CONCAT([DISTINCT] expr [,expr …][ORDER BY {unsigned_integer | col_name | formula} [ASC | DESC] [,col …]][SEPARATOR str_val])函数返回带有来自一个组的连接的非NULL值的字符串，其中为需要将返回结果去重时使用DISTINCT，需要排序是使用ORDER BY，需要制定分割符是用SEPARATOR(默认是’,’) 将GROUP_CONCAT联合CONCAT_WS或CONCAT使用(NULL的结果已经被过滤)： 0x02总结 白名单比黑名单安全 最小化限制输入范围（限制只能内网访问比全网访问安全，限制数字比所有字符安全，重命名比采用用户输入文件名更安全）]]></content>
+      <categories>
+        <category>Security</category>
+      </categories>
+      <tags>
+        <tag>Security</tag>
       </tags>
   </entry>
   <entry>
