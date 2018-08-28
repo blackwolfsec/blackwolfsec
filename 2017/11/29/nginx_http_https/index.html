@@ -92,18 +92,18 @@
 
 
 
-<meta name="description" content="0x00前言最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。">
+<meta name="description" content="0x00前言最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。2018-8-28更新配置实现，特定路径采用HTTP访问以外，其余均强制采用HTTPS访问。">
 <meta name="keywords" content="Linux,Nginx,运维">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Nginx配置HTTPS与http运维实践">
+<meta property="og:title" content="Nginx配置HTTPS与http运维实践（2018-8-28更新）">
 <meta property="og:url" content="http://blackwolfsec.cc/2017/11/29/nginx_http_https/index.html">
 <meta property="og:site_name" content="BlackWolf&#39;s Blog">
-<meta property="og:description" content="0x00前言最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。">
+<meta property="og:description" content="0x00前言最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。2018-8-28更新配置实现，特定路径采用HTTP访问以外，其余均强制采用HTTPS访问。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-28T11:29:13.556Z">
+<meta property="og:updated_time" content="2018-08-28T11:34:50.155Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Nginx配置HTTPS与http运维实践">
-<meta name="twitter:description" content="0x00前言最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。">
+<meta name="twitter:title" content="Nginx配置HTTPS与http运维实践（2018-8-28更新）">
+<meta name="twitter:description" content="0x00前言最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。2018-8-28更新配置实现，特定路径采用HTTP访问以外，其余均强制采用HTTPS访问。">
 
 
 
@@ -137,7 +137,7 @@
 
 
 
-  <title>Nginx配置HTTPS与http运维实践 | BlackWolf's Blog</title>
+  <title>Nginx配置HTTPS与http运维实践（2018-8-28更新） | BlackWolf's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -328,7 +328,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Nginx配置HTTPS与http运维实践</h1>
+          <h1 class="post-title" itemprop="name headline">Nginx配置HTTPS与http运维实践（2018-8-28更新）</h1>
         
 
         <div class="post-meta">
@@ -402,7 +402,7 @@
       
 
       
-        <h2 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h2><p>最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。<br><a id="more"></a></p>
+        <h2 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h2><p>最近采用Linux+Nginx+PHP+Mysql的方式搭建一个CodeIgniter框架的系统，需求为除了某个特定URL采用HTTP访问以外，其余均强制采用HTTPS访问。<br>2018-8-28更新配置实现，特定路径采用HTTP访问以外，其余均强制采用HTTPS访问。<br><a id="more"></a></p>
 <h2 id="0x01系统搭建"><a href="#0x01系统搭建" class="headerlink" title="0x01系统搭建"></a>0x01系统搭建</h2><ul>
 <li>服务器配置ubuntu+nginx+mysql+php5配置，参考链接：<a href="https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-ubuntu-14-04" title="How To Install Linux, nginx, MySQL, PHP (LEMP) stack on Ubuntu 14.04 " target="_blank" rel="noopener">How To Install Linux, nginx, MySQL, PHP (LEMP) stack on Ubuntu 14.04</a></li>
 <li>HTTPS配置，参考链接：<a href="https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04" title="https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-14-04" target="_blank" rel="noopener">How To Secure Nginx with Let’s Encrypt on Ubuntu 14.04</a></li>

