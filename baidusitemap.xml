@@ -4,8 +4,32 @@
 
     
   <url>
+    <loc>http://blackwolfsec.cc/2018/09/29/Hadoop/</loc>
+    <lastmod>2018-09-29T12:59:09.256Z</lastmod>
+    <data>
+        <display>
+        <title>大数据安全入门-Hadoop</title>
+        <pubTime>2018-09-29T12:51:33.000Z</pubTime>
+        
+        <tag>Security</tag>
+         
+        <tag>大数据</tag>
+         
+        <tag>Hadoop</tag>
+         
+         
+           
+             
+              <breadCrumb title="大数据" url="http://blackwolfsec.cc/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://blackwolfsec.cc/2017/11/29/nginx_http_https/</loc>
-    <lastmod>2018-08-28T11:36:13.994Z</lastmod>
+    <lastmod>2018-09-29T10:02:17.094Z</lastmod>
     <data>
         <display>
         <title>Nginx配置HTTPS与http运维实践（2018-8-28更新）</title>
@@ -274,9 +298,9 @@
         
         <tag>Security</tag>
          
-        <tag>数据库</tag>
-         
         <tag>Mysql</tag>
+         
+        <tag>数据库</tag>
          
          
            
