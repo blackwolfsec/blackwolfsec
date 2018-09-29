@@ -100,7 +100,7 @@
 <meta property="og:site_name" content="BlackWolf&#39;s Blog">
 <meta property="og:description" content="0x00前言近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-29T12:59:09.256Z">
+<meta property="og:updated_time" content="2018-09-29T13:02:32.445Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="大数据安全入门-Hadoop">
 <meta name="twitter:description" content="0x00前言近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞">
@@ -404,10 +404,8 @@
       
         <h3 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h3><p>近期入门大数据安全，分享一下Win10搭建Hadoop问题、相关安全概念和Hadoop Yarn REST API未授权命令执行漏洞<br><a id="more"></a></p>
 <h3 id="0x01环境安装"><a href="#0x01环境安装" class="headerlink" title="0x01环境安装"></a>0x01环境安装</h3><ul>
-<li><strong>1.win10安装Hadoop集群</strong><br>参考链接<a href="https://github.com/MuhammadBilalYar/Hadoop-On-Window/wiki/Step-by-step-Hadoop-2.8.0-installation-on-Window-10" target="_blank" rel="noopener">Step-by-step-Hadoop-2.8.0-installation-on-Window-10</a></li>
-</ul>
-<p>注意事项：hadoop-env.cmd文件中JAVA_HOME需要用双引号包裹，而且路径不能包括空格，否则报错：<br><code>set JAVA_HOME=&quot;C:\jdk1.8.0_171&quot;</code></p>
-<ul>
+<li><p><strong>1.win10安装Hadoop集群</strong><br>参考链接<a href="https://github.com/MuhammadBilalYar/Hadoop-On-Window/wiki/Step-by-step-Hadoop-2.8.0-installation-on-Window-10" target="_blank" rel="noopener">Step-by-step-Hadoop-2.8.0-installation-on-Window-10</a>。<br>注意事项：hadoop-env.cmd文件中JAVA_HOME需要用双引号包裹，而且路径不能包括空格，否则报错：<br><code>set JAVA_HOME=&quot;C:\jdk1.8.0_171&quot;</code></p>
+</li>
 <li><p><strong>2.Docker快速搭建Hadoop集群</strong></p>
 <figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -d -P sequenceiq/hadoop-docker</span></span><br></pre></td></tr></table></figure>
 </li>
