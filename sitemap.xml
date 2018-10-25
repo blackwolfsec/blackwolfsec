@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://blackwolfsec.cc/about/index.html</loc>
+    
+    <lastmod>2018-10-25T09:17:37.931Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://blackwolfsec.cc/2018/09/29/Hadoop/</loc>
     
     <lastmod>2018-09-29T13:10:03.016Z</lastmod>
@@ -47,13 +54,6 @@
     <loc>http://blackwolfsec.cc/2018/07/18/BFscan/</loc>
     
     <lastmod>2018-07-18T13:03:21.869Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://blackwolfsec.cc/about/index.html</loc>
-    
-    <lastmod>2018-06-27T01:29:41.462Z</lastmod>
     
   </url>
   
