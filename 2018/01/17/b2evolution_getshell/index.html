@@ -417,7 +417,7 @@
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"baseurl = '"</span>.str_replace( <span class="string">"'"</span>, <span class="string">"\'"</span>, $params[<span class="string">'baseurl'</span>] ).<span class="string">"';"</span></span><br></pre></td></tr></table></figure>
 <p>字符串baseurl处理后如下:<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/b2evolution/</span>\\\<span class="string">';phpinfo();//</span></span><br></pre></td></tr></table></figure></p>
 <p>所以导致了单引号的逃逸，紧接着调用save_to_file存入/conf/_basic_config.php文件。</p>
-<p>4.打开/conf/_basic_config.php文件内容如下：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$baseurl</span> = <span class="string">'http://localhost/b2evolution/\\'</span>;phpinfo();<span class="regexp">//</span><span class="string">';</span></span><br></pre></td></tr></table></figure></p>
+<p>4.打开/conf/_basic_config.php文件内容如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$baseurl = <span class="string">'http://localhost/b2evolution/\\'</span>;phpinfo();<span class="comment">//';</span></span><br></pre></td></tr></table></figure></p>
 <p>5.shell地址：<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/b2evolution/</span></span><br></pre></td></tr></table></figure></p>
 <h2 id="0x03小结"><a href="#0x03小结" class="headerlink" title="0x03小结"></a>0x03小结</h2><p>这个漏洞需要在重装的时候才能利用，可以结合任意文件删除漏洞利用。</p>
 
@@ -616,65 +616,11 @@
               </span>
             
               <span class="links-of-author-item">
-                <a href="http://wps2015.org/" target="_blank" title="wps2015">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  wps2015
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="http://ohroot.com/" target="_blank" title="半饱和">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  半饱和
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="http://www.mauu.me/" target="_blank" title="ksss'blog">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  ksss'blog
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="http://ecma.io/" target="_blank" title="该隐">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  该隐
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="http://www.sccsec.com" target="_blank" title="胖胖的博客">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  胖胖的博客
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
                 <a href="http://phantom0301.cc/" target="_blank" title="零の杂货铺">
                   
                     <i class="fa fa-fw fa-globe"></i>
                   
                   零の杂货铺
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="http://syean.cn/" target="_blank" title="我是_一棵树_">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  我是_一棵树_
                 </a>
               </span>
             
@@ -725,7 +671,7 @@
         <div class="copyright" >
   
   &copy;  2016 - 
-  <span itemprop="copyrightYear">2019</span>
+  <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
